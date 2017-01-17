@@ -57,7 +57,6 @@ class Ocranizer::Interface::Main
 
     when 'q'
       @enabled = false
-
     end
 
     return char
@@ -75,6 +74,5 @@ class Ocranizer::Interface::Main
   end
 
   def render_event_window(event : Ocranizer::Event)
-
   end
 end

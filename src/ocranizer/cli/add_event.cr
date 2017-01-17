@@ -22,7 +22,6 @@ class Ocranizer::Cli::AddEvent
     unless r[:type] == :error
       puts "Time from: #{r[:time].colorize(:green)}"
     end
-
   end
 
   def process_time(s : String)

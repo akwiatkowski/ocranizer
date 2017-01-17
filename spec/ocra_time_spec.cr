@@ -13,7 +13,6 @@ describe Ocranizer::OcraTime do
       o.not_nil!.time.hour.should eq(a[0])
       o.not_nil!.time.minute.should eq(a[1])
     end
-
   end
 
   it "parse YYYY:mm:dd HH:MM" do
@@ -44,10 +43,9 @@ describe Ocranizer::OcraTime do
     o = Ocranizer::OcraTime.parse_human("next day")
     o.should be_truthy
 
-    # o.not_nil!.time.year.should eq(a[0])
-    # o.not_nil!.time.month.should eq(a[1])
-    # o.not_nil!.time.day.should eq(a[2])
+    t = o.not_nil!.time
+
+    (Time.now - t < Time::Span.new(-24, 0, 0)).should be_true
+    (Time.now - t > Time::Span.new(-24, -11, 0)).should be_true
   end
-
-
 end
