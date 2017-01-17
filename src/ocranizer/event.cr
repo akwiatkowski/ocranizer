@@ -1,0 +1,2 @@
+struct Ocranizer::Event
+end

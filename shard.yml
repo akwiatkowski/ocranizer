@@ -1,0 +1,17 @@
+name: ocranizer
+version: 0.1.0
+
+authors:
+  - Aleksander Kwiatkowski <bobikx@poczta.fm>
+
+targets:
+  ocranizer:
+    main: src/ocranizer.cr
+
+crystal: 0.20.4
+
+license: MIT
+
+dependencies:
+  ncurses:
+    github: jreinert/ncurses-crystal
