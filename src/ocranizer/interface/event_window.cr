@@ -13,4 +13,9 @@ class Ocranizer::Interface::EventWindow
     LibNCurses.mvwprintw(@window, 0, 0, "Event:")
     @window.refresh
   end
+
+  def send_key(key)
+    LibNCurses.mvwprintw(@window, 1, 1, "key: #{key.inspect}")
+    @window.refresh
+  end
 end
