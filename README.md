@@ -1,6 +1,6 @@
 # ocranizer
 
-TODO: Write a description here
+Simple fast CLI organizer.
 
 ## Installation
 
@@ -12,11 +12,17 @@ TODO: Write usage instructions here
 
 ## Development
 
-TODO: Write development instructions here
+* [ ] Add events, todos using command line interface
+* [ ] Inteligent time parser: full, partial, words like tommorow, +1 day, +1 week
+* [ ] List of upcoming events
+* [ ] Edit existing events
+* [ ] Postpone
+* [ ] Integrare output with [remind](https://wiki.archlinux.org/index.php/Remind )
+* [ ] Render HTML output
 
 ## Contributing
 
-1. Fork it ( https://github.com/[your-github-name]/ocranizer/fork )
+1. Fork it ( https://github.com/akwiatkowski/ocranizer/fork )
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)
@@ -24,4 +30,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [[your-github-name]](https://github.com/[your-github-name]) Aleksander Kwiatkowski - creator, maintainer
+- [akwiatkowski](https://github.com/akwiatkowski) Aleksander Kwiatkowski - creator, maintainer
