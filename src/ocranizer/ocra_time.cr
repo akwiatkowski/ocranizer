@@ -100,20 +100,22 @@ struct Ocranizer::OcraTime
   def self.parse_relative(s : String)
     is_okay = false
     t = Time::Span.new(0)
+    regexp = /(next|prev)?\s*(\d*\s*\w+)/
+    result = s.scan(regexp)
 
-    if s =~ /next (\d*\s*\w+)/
-      r = parse_relative_span($1)
-      if r
-        t += r
-        is_okay = true
-      end
-    end
+    # protip: better use scan, becuase if there is nil at $1
+    # you wil have problem to debug it
+    if result.size > 0
+      r = parse_relative_span(result[0][2])
 
-    if s =~ /prev (\d*\s*\w+)/
-      r = parse_relative_span($1)
       if r
-        t += (r * (-1))
-        is_okay = true
+        if result[0][1]?.to_s.strip == "prev"
+          t += (r * (-1))
+          is_okay = true
+        else
+          t += r
+          is_okay = true
+        end
       end
     end
 

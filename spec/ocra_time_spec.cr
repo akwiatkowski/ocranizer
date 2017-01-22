@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 describe Ocranizer::OcraTime do
-  it "parse HH:MM" do
+  it "parse 'HH:MM' format" do
     t = Time.now
     [[10, 20]].each do |a|
       o = Ocranizer::OcraTime.parse_human("#{a[0]}:#{a[1]}")
@@ -15,7 +15,7 @@ describe Ocranizer::OcraTime do
     end
   end
 
-  it "parse YYYY:mm:dd HH:MM" do
+  it "parse 'YYYY:mm:dd HH:MM' format" do
     [[2010, 10, 11, 10, 20]].each do |a|
       o = Ocranizer::OcraTime.parse_human("#{a[0]}-#{a[1]}-#{a[2]} #{a[3]}:#{a[4]}")
       o.should be_truthy
@@ -28,7 +28,7 @@ describe Ocranizer::OcraTime do
     end
   end
 
-  it "parse YYYY:mm:dd" do
+  it "parse 'YYYY:mm:dd' format" do
     [[2010, 10, 11]].each do |a|
       o = Ocranizer::OcraTime.parse_human("#{a[0]}-#{a[1]}-#{a[2]}")
       o.should be_truthy
@@ -39,7 +39,7 @@ describe Ocranizer::OcraTime do
     end
   end
 
-  it "parse next day" do
+  it "parse 'next day' string" do
     o = Ocranizer::OcraTime.parse_human("next day")
     o.should be_truthy
 
@@ -49,8 +49,28 @@ describe Ocranizer::OcraTime do
     (Time.now - t > Time::Span.new(-24, -11, 0)).should be_true
   end
 
-  it "parse next 2 days" do
+  it "parse 'day' string (next is by default)" do
+    o = Ocranizer::OcraTime.parse_human("day")
+    o.should be_truthy
+
+    t = o.not_nil!.time
+
+    (Time.now - t < Time::Span.new(-24, 0, 0)).should be_true
+    (Time.now - t > Time::Span.new(-24, -11, 0)).should be_true
+  end
+
+  it "parse 'next 2 days'" do
     o = Ocranizer::OcraTime.parse_human("next 2 days")
+    o.should be_truthy
+
+    t = o.not_nil!.time
+
+    (Time.now - t < Time::Span.new(-48, 0, 0)).should be_true
+    (Time.now - t > Time::Span.new(-48, -11, 0)).should be_true
+  end
+
+  it "parse '2 days'" do
+    o = Ocranizer::OcraTime.parse_human("2 days")
     o.should be_truthy
 
     t = o.not_nil!.time
