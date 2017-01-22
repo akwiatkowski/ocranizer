@@ -34,8 +34,8 @@ struct Ocranizer::OcraTime
   def initialize(@time : Time, @type : Int32)
   end
 
-  def self.parse_human(s : String)
-    s = s.strip
+  def self.parse_human(string : String, base_time : (Time | Nil) = nil)
+    s = string.strip
 
     # parse human-like relative
     relative = parse_relative(s)
@@ -69,7 +69,7 @@ struct Ocranizer::OcraTime
     rescue Time::Format::Error
     end
 
-    return new(base_time: nil, relative: relative, type: TYPE_RELATIVE)
+    return new(base_time: base_time, relative: relative, type: TYPE_RELATIVE)
   end
 
   def self.new(base_time : (Time | Nil), relative : (Time::Span | Nil), type : Int32)
