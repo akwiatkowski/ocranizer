@@ -1,4 +1,7 @@
 require "yaml"
+require "colorize"
+
+require "./ocra_time"
 
 struct Ocranizer::Event
   YAML.mapping(
@@ -24,4 +27,12 @@ struct Ocranizer::Event
   end
 
   property :time_from, :time_to, :title, :desc, :place
+
+  def show
+    puts "Event: #{title.colorize(:yellow)}"
+    puts "from: #{time_from.time.to_s.colorize(:green)}"
+    puts "to: #{time_to.time.to_s.colorize(:green)}"
+    puts "place: #{place.colorize(:yellow)}"
+    puts "desc: #{place.colorize(:yellow)}"
+  end
 end

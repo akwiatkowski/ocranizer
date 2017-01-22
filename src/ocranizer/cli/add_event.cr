@@ -19,6 +19,8 @@ class Ocranizer::Cli::AddEvent
 
     confirm
     save
+
+    show
   end
 
   def get_time_from
@@ -86,6 +88,10 @@ class Ocranizer::Cli::AddEvent
     c.load
     c.add(@event)
     c.save
+  end
+
+  def show
+    @event.show
   end
 
 end
