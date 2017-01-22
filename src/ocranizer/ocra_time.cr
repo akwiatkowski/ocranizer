@@ -75,14 +75,14 @@ struct Ocranizer::OcraTime
     # YYYY-mm-dd HH:MM
     begin
       parsed = Time.parse(time: s, pattern: "%Y-%m-%d %H:%M", kind: Time::Kind::Local)
-      return new(time: parsed + relative, type: TYPE_EXACT)
+      return new(time: add_relative_interval(parsed, relative), type: TYPE_EXACT)
     rescue Time::Format::Error
     end
 
     # YYYY-mm-dd, only day
     begin
       parsed = Time.parse(time: s, pattern: "%Y-%m-%d", kind: Time::Kind::Local)
-      return new(time: parsed + relative, type: TYPE_FULLDAY)
+      return new(time: add_relative_interval(parsed, relative), type: TYPE_FULLDAY)
     rescue Time::Format::Error
     end
 
@@ -97,11 +97,11 @@ struct Ocranizer::OcraTime
         minute: parsed.minute
       )
 
-      return new(time: parsed + relative, type: TYPE_HOUR)
+      return new(time: add_relative_interval(parsed, relative), type: TYPE_HOUR)
     rescue Time::Format::Error
     end
 
-    return new(time: now_normalized + relative, type: TYPE_RELATIVE)
+    return new(time: add_relative_interval(now_normalized, relative), type: TYPE_RELATIVE)
   end
 
   def self.now_normalized
@@ -109,5 +109,44 @@ struct Ocranizer::OcraTime
     e -= e % TEN_MIN_SPAN.total_seconds.to_i64
     e += TEN_MIN_SPAN.total_seconds.to_i64
     return Time.epoch(e)
+  end
+
+  def self.add_relative_interval(time : Time, span : Time::Span) : Time
+    next_month = time.month
+    next_year = time.year
+
+    if span == MONTH_SPAN
+      # it's tricky!
+      # what if someone wants add month to January 30?
+      next_month = time.month + 1
+      if next_month > 12
+        next_month = 1
+        next_year = time.year + 1
+      else
+        next_year = time.year
+      end
+
+      begin
+        result_time = Time.new(
+          next_year,
+          next_month,
+          time.day,
+          time.hour,
+          time.minute
+        )
+        return result_time
+      rescue e
+        if e.message == "invalid time"
+          return time + span
+        else
+          raise e
+        end
+      end
+    end
+
+    if span == YEAR_SPAN
+    end
+
+    return time + span
   end
 end

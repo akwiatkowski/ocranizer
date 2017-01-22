@@ -48,4 +48,13 @@ describe Ocranizer::OcraTime do
     (Time.now - t < Time::Span.new(-24, 0, 0)).should be_true
     (Time.now - t > Time::Span.new(-24, -11, 0)).should be_true
   end
+
+  it "add 1 month to January 30" do
+    time = Time.new(2010, 1, 30)
+    span = Ocranizer::OcraTime::MONTH_SPAN
+
+    result = Ocranizer::OcraTime.add_relative_interval(time, span)
+
+    ((result - time) >= Ocranizer::OcraTime::MONTH_SPAN).should be_true
+  end
 end
