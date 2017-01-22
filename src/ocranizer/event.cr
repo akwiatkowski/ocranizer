@@ -1,8 +1,11 @@
 struct Ocranizer::Event
+  @time_from : OcraTime
+  @time_to : OcraTime
+
   def initialize
-    @time_from = Time.now
-    @time_to = (@time_from + Time::Span.new(1, 0, 0)).as(Time)
+    @time_from = OcraTime.new_time_from
+    @time_to = OcraTime.new_time_to
   end
 
-  getter :time_from, :time_to
+  property :time_from, :time_to
 end
