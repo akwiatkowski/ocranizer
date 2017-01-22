@@ -13,6 +13,12 @@ class Ocranizer::Cli::AddEvent
 
     get_time_from
     get_time_to
+    get_title
+    get_place
+    get_desc
+
+    confirm
+    save
   end
 
   def get_time_from
@@ -33,6 +39,7 @@ class Ocranizer::Cli::AddEvent
     loop do
       puts "Time to? (enter to add +1h)"
       s = gets
+      s = "next hour" if s.to_s.strip == ""
       r = OcraTime.parse_human(string: s.to_s, base_time: @event.time_from.time)
 
       if r.not_error?
@@ -41,6 +48,44 @@ class Ocranizer::Cli::AddEvent
         return
       end
     end
+  end
+
+  def get_title
+    loop do
+      puts "Title?"
+      s = gets
+
+      if s.to_s.size > 2
+        @event.title = s.to_s
+        puts "Title: #{@event.title.colorize(:yellow)}"
+        return
+      end
+    end
+  end
+
+  def get_place
+    puts "Place?"
+    s = gets
+    @event.place = s.to_s
+    puts "Place: #{@event.place.colorize(:yellow)}"
+  end
+
+  def get_desc
+    puts "Desc?"
+    s = gets
+    @event.desc = s.to_s
+    puts "Desc: #{@event.place.colorize(:yellow)}"
+  end
+
+  def confirm
+    gets
+  end
+
+  def save
+    c = Ocranizer::Collection.new
+    c.load
+    c.add(@event)
+    c.save
   end
 
 end

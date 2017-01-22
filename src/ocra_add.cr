@@ -1,4 +1,5 @@
 require "./ocranizer/event"
+require "./ocranizer/collection"
 require "./ocranizer/ocra_time"
 
 require "./ocranizer/cli/add_event"

@@ -1,3 +1,5 @@
+require "yaml"
+
 struct Ocranizer::OcraTime
   TYPE_ERROR    = -1
   TYPE_RELATIVE =  0
@@ -18,6 +20,17 @@ struct Ocranizer::OcraTime
   getter :type
   getter :time
 
+  YAML.mapping(
+    type: {
+      type:    Int32,
+      nilable: true
+    },
+    time: {
+      type:    Time,
+      nilable: false
+    }
+  )
+
   # constructors, factories
   def self.new_error
     new(time: now_normalized, type: TYPE_ERROR)
@@ -32,6 +45,7 @@ struct Ocranizer::OcraTime
   end
 
   def initialize(@time : Time, @type : Int32)
+    @time = @time.to_local
   end
 
   def self.parse_human(string : String, base_time : (Time | Nil) = nil)
