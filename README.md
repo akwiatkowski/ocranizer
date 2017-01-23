@@ -19,6 +19,9 @@ TODO: Write usage instructions here
 * [ ] Postpone
 * [ ] Integrare output with [remind](https://wiki.archlinux.org/index.php/Remind )
 * [ ] Render HTML output
+* [ ] CLI add
+* [ ] commad line (non-interactive): add, edit, postpone, delete
+* [ ] Saving with backup
 
 ## Contributing
 

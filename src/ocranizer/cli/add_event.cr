@@ -30,7 +30,7 @@ class Ocranizer::Cli::AddEvent
       r = OcraTime.parse_human(s.to_s)
 
       if r.not_error?
-        puts "Time from: #{r.time.to_s.colorize(:green)}"
+        puts "Time from: #{r.to_human.to_s.colorize(:green)}"
         @event.time_from = r
         return
       end
@@ -45,7 +45,7 @@ class Ocranizer::Cli::AddEvent
       r = OcraTime.parse_human(string: s.to_s, base_time: @event.time_from.time)
 
       if r.not_error?
-        puts "Time to: #{r.time.to_s.colorize(:green)}"
+        puts "Time to: #{r.to_human.to_s.colorize(:green)}"
         @event.time_to = r
         return
       end

@@ -76,7 +76,8 @@ struct Ocranizer::OcraTime
         month: Time.now.month,
         day: Time.now.day,
         hour: parsed.hour,
-        minute: parsed.minute
+        minute: parsed.minute,
+        kind: Time::Kind::Local
       )
 
       return new(base_time: parsed, relative: relative, type: TYPE_HOUR)
@@ -109,6 +110,29 @@ struct Ocranizer::OcraTime
 
   def not_error?
     !error?
+  end
+
+  # human type
+  def to_human
+    case @type
+    when TYPE_RELATIVE then to_full_string
+    when TYPE_EXACT then to_full_string
+    when TYPE_FULLDAY then to_date_string
+    when TYPE_HOUR then to_full_string
+    else "Error"
+    end
+  end
+
+  def to_full_string
+    return to_date_string + " " + to_hour_string
+  end
+
+  def to_date_string
+    return @time.to_s("%Y-%m-%d")
+  end
+
+  def to_hour_string
+    return @time.to_s("%H:%M")
   end
 
   def self.parse_relative(s : String)

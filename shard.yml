@@ -5,8 +5,8 @@ authors:
   - Aleksander Kwiatkowski <bobikx@poczta.fm>
 
 targets:
-  ocranizer:
-    main: src/ocranizer.cr
+  pim:
+    main: src/pim.cr
 
 crystal: 0.20.4
 
