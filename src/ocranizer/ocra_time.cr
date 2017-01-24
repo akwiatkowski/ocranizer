@@ -23,11 +23,11 @@ struct Ocranizer::OcraTime
   YAML.mapping(
     type: {
       type:    Int32,
-      nilable: true
+      nilable: true,
     },
     time: {
       type:    Time,
-      nilable: false
+      nilable: false,
     }
   )
 
@@ -116,10 +116,10 @@ struct Ocranizer::OcraTime
   def to_human
     case @type
     when TYPE_RELATIVE then to_full_string
-    when TYPE_EXACT then to_full_string
-    when TYPE_FULLDAY then to_date_string
-    when TYPE_HOUR then to_full_string
-    else "Error"
+    when TYPE_EXACT    then to_full_string
+    when TYPE_FULLDAY  then to_date_string
+    when TYPE_HOUR     then to_full_string
+    else                    "Error"
     end
   end
 

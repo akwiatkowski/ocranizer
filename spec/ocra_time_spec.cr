@@ -79,7 +79,6 @@ describe Ocranizer::OcraTime do
     (Time.now - t > Time::Span.new(-48, -11, 0)).should be_true
   end
 
-
   it "parse next hour" do
     o = Ocranizer::OcraTime.parse_human("next hour")
     o.should be_truthy
@@ -123,5 +122,4 @@ describe Ocranizer::OcraTime do
     o.not_nil!.error?.should be_true
     o.not_nil!.not_error?.should be_false
   end
-
 end

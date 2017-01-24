@@ -93,5 +93,4 @@ class Ocranizer::Cli::AddEvent
   def show
     @event.show
   end
-
 end
