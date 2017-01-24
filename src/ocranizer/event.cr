@@ -27,7 +27,7 @@ struct Ocranizer::Event
     @tags = Array(String).new
   end
 
-  property :time_from, :time_to, :name, :desc, :place
+  property :time_from, :time_to, :name, :desc, :place, :category
 
   def to_s_full
     st = String.build do |s|
@@ -36,53 +36,67 @@ struct Ocranizer::Event
         s << "\n"
       end
 
-      s << name.colorize(:yellow).to_s
+      s << self.name.colorize(:yellow).to_s
       s << "\n"
 
-      s << time_from.to_human.to_s.colorize(:green).to_s
+      s << self.time_from.to_human.to_s.colorize(:green).to_s
       s << " -> "
-      s << time_to.to_human.to_s.colorize(:green).to_s
+      s << self.time_to.to_human.to_s.colorize(:green).to_s
       s << "\n"
 
-      if place.size > 0
+      if self.place.size > 0
         s << "at: "
-        s << place.colorize(:yellow).to_s
+        s << self.place.colorize(:yellow).to_s
         s << "\n"
       end
 
-      if desc.size > 0
+      if self.desc.size > 0
         s << "details: "
-        s << desc.colorize(:yellow).to_s
+        s << self.desc.colorize(:yellow).to_s
         s << "\n"
       end
 
-      if category.size > 0
+      if self.category.size > 0
         s << "category: "
-        s << category.colorize(:magenta).to_s
+        s << self.category.colorize(:magenta).to_s
         s << "\n"
       end
 
-      if tags.size > 0
+      if self.tags.size > 0
         s << "tags: "
-        s << tags.join(", ").colorize(:cyan).to_s
+        s << self.tags.join(", ").colorize(:cyan).to_s
         s << "\n"
       end
 
       s << "Id: "
-      s << id.to_s
+      s << self.id.to_s
       s << "\n"
     end
 
     return st
   end
 
+  def self.inline_head
+    # TODO
+  end
+
   def to_s_inline
     st = String.build do |s|
-      s << name[0..28].colorize(:yellow).to_s.rjust(36)
+      s << self.name[0..28].colorize(:yellow).to_s.rjust(36)
       s << " : "
-      s << time_from.to_human.colorize(:green).to_s.ljust(25)
+      s << self.time_from.to_human.colorize(:green).to_s.ljust(25)
       s << " - "
-      s << time_to.to_human.colorize(:green).to_s.ljust(32)
+      s << self.time_to.to_human.colorize(:green).to_s.ljust(25)
+      s << " "
+      s << ("[" + self.id + "]").colorize(:dark_gray).to_s.ljust(28)
+      s << " "
+      s << self.category.colorize(:cyan)
+
+      if self.tags.size > 0
+        s << ", "
+        s << self.tags.join(", ")[0..20].colorize(:magenta)
+      end
+
     end
 
     return st
