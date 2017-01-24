@@ -4,7 +4,7 @@ require "colorize"
 require "./ocra_time"
 require "./collection"
 
-struct Ocranizer::Event
+struct Ocranizer::Todo
   YAML.mapping(
     id: String,
     name: String,
@@ -12,8 +12,8 @@ struct Ocranizer::Event
     desc: String,
     category: String,
     tags: Array(String),
-    time_from: OcraTime,
-    time_to: OcraTime
+    time_from: (OcraTime | Nil),
+    time_to: (OcraTime | Nil)
   )
 
   def initialize
@@ -39,9 +39,9 @@ struct Ocranizer::Event
       s << self.name.colorize(:yellow).to_s
       s << "\n"
 
-      s << self.time_from.to_human.to_s.colorize(:green).to_s
+      s << self.time_from.not_nil!.to_human.to_s.colorize(:green).to_s if self.time_from
       s << " -> "
-      s << self.time_to.to_human.to_s.colorize(:green).to_s
+      s << self.time_to.not_nil!.to_human.to_s.colorize(:green).to_s if self.time_to
       s << "\n"
 
       if self.place.size > 0
@@ -84,9 +84,21 @@ struct Ocranizer::Event
     st = String.build do |s|
       s << self.name[0..28].colorize(:yellow).to_s.rjust(36)
       s << " : "
-      s << self.time_from.to_human.colorize(:green).to_s.ljust(25)
+
+      if self.time_from
+        s << self.time_from.not_nil!.to_human.colorize(:green).to_s.ljust(25)
+      else
+        s << "".ljust(25)
+      end
+
       s << " - "
-      s << self.time_to.to_human.colorize(:green).to_s.ljust(25)
+
+      if self.time_to
+        s << self.time_to.not_nil!.to_human.colorize(:green).to_s.ljust(25)
+      else
+        s << "".ljust(25)
+      end
+
       s << " "
       s << ("[" + self.id + "]").colorize(:dark_gray).to_s.ljust(28)
       s << " "
@@ -107,7 +119,9 @@ struct Ocranizer::Event
   end
 
   def time_to_string=(s : String)
-    self.time_to = OcraTime.parse_human(string: s, base_time: self.time_from.time)
+    t = nil
+    t = self.time_from.not_nil!.time if self.time_from
+    self.time_to = OcraTime.parse_human(string: s, base_time: t)
   end
 
   def tags_string=(s : String)
@@ -122,7 +136,7 @@ struct Ocranizer::Event
   end
 
   def valid?
-    if time_from.error? || time_to.error? || name.size < 3
+    if name.size < 3
       return false
     else
       return true
@@ -133,4 +147,18 @@ struct Ocranizer::Event
     Ocranizer::Collection.duplicate?(self)
   end
 
+  def self.add_from_string(string : String)
+    sa = string.split(/,/)
+
+    e = new
+    e.time_from = OcraTime.parse_human(string: sa[0])
+    e.time_to = OcraTime.parse_human(string: sa[1], base_time: e.time_from.time)
+    e.name = sa[2]
+    e.place = sa[3] if sa[3]?
+    e.desc = sa[4] if sa[4]?
+
+    Ocranizer::Collection.add(e)
+
+    return e
+  end
 end

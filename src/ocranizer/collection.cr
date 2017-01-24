@@ -2,34 +2,43 @@ require "yaml"
 require "file_utils"
 
 require "./event"
+require "./todo"
 
 class Ocranizer::Collection
   PATH        = "/home/#{`whoami`.to_s.strip}/.ocranizer.yml"
   PATH_BACKUP = PATH + ".bak"
 
   YAML.mapping(
-    array: Array(Ocranizer::Event)
+    events: Array(Ocranizer::Event),
+    todos: Array(Ocranizer::Todo)
   )
 
-  getter :array
+  getter :events, :todos
 
   def initialize
-    @array = Array(Ocranizer::Event).new
+    @events = Array(Ocranizer::Event).new
+    @todos = Array(Ocranizer::Todo).new
   end
 
   def add(e : Ocranizer::Event)
-    @array << e
+    @events << e
+  end
+
+  def add(e : Ocranizer::Todo)
+    @todos << e
   end
 
   def load
     if File.exists?(PATH)
       # load regular
       o = Ocranizer::Collection.from_yaml(File.read(PATH))
-      @array = o.array
+      @events = o.events
+      @todos = o.todos
     elsif File.exists?(PATH_BACKUP)
       # try loading backup
       o = Ocranizer::Collection.from_yaml(File.read(PATH_BACKUP))
-      @array = o.array
+      @events = o.events
+      @todos = o.todos
     end
   end
 
@@ -43,12 +52,18 @@ class Ocranizer::Collection
     end
   end
 
-  def incoming(max : Int32 = 20)
+  def incoming_events(max : Int32 = 20)
     tf = Time.now.at_beginning_of_day
-    return @array.select{|e| e.time_from.at_beginning_of_day >= tf}.sort{|a,b| a.time_from.time <=> b.time_from.time }[0...max]
+    return @events.select{|e| e.time_from.at_beginning_of_day >= tf}.sort{|a,b| a.time_from.time <=> b.time_from.time }[0...max]
   end
 
-  def self.add(e : Ocranizer::Event)
+  def incoming_todos(max : Int32 = 20)
+    tf = Time.now.at_end_of_day
+    todos = @todos.select{|e| e.time_to }.select{|e| e.time_to.not_nil!.time.not_nil! <= tf }.sort{|a,b| a.time_to.not_nil!.time <=> b.time_to.not_nil!.time }
+    return todos[0...max]
+  end
+
+  def self.add(e : (Ocranizer::Event | Ocranizer::Todo))
     c = new
     c.load
     c.add(e)
@@ -59,18 +74,38 @@ class Ocranizer::Collection
     c = new
     c.load
 
-    return c.array.select{|f| e.name == f.name && e.time_from == f.time_from }.size > 0
+    return c.events.select{|f| e.name == f.name && e.time_from == f.time_from }.size > 0
   end
 
-  def self.incoming(max : Int32 = 20)
+  def self.duplicate?(e : Ocranizer::Todo)
     c = new
     c.load
-    return c.incoming(max: max)
+
+    return c.events.select{|f| e.name == f.name && e.time_from == f.time_from }.size > 0
   end
 
-  def self.get(id : String)
+  def self.incoming_events(max : Int32 = 20)
     c = new
     c.load
-    return c.array.select{|e| e.id == id}.first
+    return c.incoming_events(max: max)
   end
+
+  def self.incoming_todos(max : Int32 = 20)
+    c = new
+    c.load
+    return c.incoming_todos(max: max)
+  end
+
+  def self.get_event(id : String)
+    c = new
+    c.load
+    return c.events.select{|e| e.id == id}.first
+  end
+
+  def self.get_todo(id : String)
+    c = new
+    c.load
+    return c.todos.select{|e| e.id == id}.first
+  end
+
 end
