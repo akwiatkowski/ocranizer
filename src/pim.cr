@@ -5,6 +5,7 @@ require "./ocranizer/collection"
 
 b_incoming = false
 b_add = false
+b_force = false
 
 s_name = String.new
 s_time_from = String.new
@@ -28,7 +29,7 @@ OptionParser.parse! do |parser|
   }
 
   # event params
-  parser.on("-n FROM", "--name=NAME", "Name of event") { |s|
+  parser.on("-n NAME", "--name=NAME", "Name of event") { |s|
     s_name = s
   }
 
@@ -56,6 +57,10 @@ OptionParser.parse! do |parser|
     s_desc = s
   }
 
+  parser.on("-F", "--force", "Add event") {
+    b_force = true
+  }
+
   # end
   parser.on("-h", "--help", "Show this help") { puts parser }
 end
@@ -70,13 +75,27 @@ if b_add
   e.category = s_category
   e.tags_string = s_tags
 
-  e.show
+  puts e.to_s_full
+
+  if e.valid?
+    if e.duplicate?
+      # valid, but duplicate
+      if b_force
+        puts "Duplicate, but add forced"
+        e.save
+      else
+        puts "Duplicate, not saving"
+      end
+    else
+      # valid and not duplicate
+      e.save
+    end
+  end
+
 end
 
-#
-# c = Ocranizer::Collection.new
-# c.load
-# events = c.incoming
-# events.each do |e|
-#   e.show_inline
-# end
+if b_incoming
+  Ocranizer::Collection.incoming.each do |e|
+    puts e.to_s_inline
+  end
+end

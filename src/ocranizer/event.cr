@@ -29,38 +29,94 @@ struct Ocranizer::Event
 
   property :time_from, :time_to, :name, :desc, :place
 
-  def show
-    puts "#{name.colorize(:yellow)} (event)"
-    puts "#{time_from.to_human.to_s.colorize(:green)} -> #{time_to.to_human.to_s.colorize(:green)}"
-    puts "at: #{place.colorize(:yellow)}" if place.size > 0
-    puts "details: #{desc.colorize(:yellow)}" if desc.size > 0
+  def to_s_full
+    st = String.build do |s|
+      if false == valid?
+        s << "INVALID".colorize(:red).to_s
+        s << "\n"
+      end
+
+      s << name.colorize(:yellow).to_s
+      s << "\n"
+
+      s << time_from.to_human.to_s.colorize(:green).to_s
+      s << " -> "
+      s << time_to.to_human.to_s.colorize(:green).to_s
+      s << "\n"
+
+      if place.size > 0
+        s << "at: "
+        s << place.colorize(:yellow).to_s
+        s << "\n"
+      end
+
+      if desc.size > 0
+        s << "details: "
+        s << desc.colorize(:yellow).to_s
+        s << "\n"
+      end
+
+      if category.size > 0
+        s << "category: "
+        s << category.colorize(:magenta).to_s
+        s << "\n"
+      end
+
+      if tags.size > 0
+        s << "tags: "
+        s << tags.join(", ").colorize(:cyan).to_s
+        s << "\n"
+      end
+
+      s << "Id: "
+      s << id.to_s
+      s << "\n"
+    end
+
+    return st
   end
 
-  def show_inline
+  def to_s_inline
     st = String.build do |s|
-      s << name[0..20].colorize(:yellow).to_s.ljust(28)
-      s << time_from.to_human.colorize(:green).to_s.ljust(32)
+      s << name[0..28].colorize(:yellow).to_s.rjust(36)
+      s << " : "
+      s << time_from.to_human.colorize(:green).to_s.ljust(25)
+      s << " - "
       s << time_to.to_human.colorize(:green).to_s.ljust(32)
     end
 
-    puts st
+    return st
   end
 
   def time_from_string=(s : String)
-    time_from = OcraTime.parse_human(string: s)
+    self.time_from = OcraTime.parse_human(string: s)
   end
 
   def time_to_string=(s : String)
-    time_to = OcraTime.parse_human(string: s, base_time: time_from.time)
+    self.time_to = OcraTime.parse_human(string: s, base_time: time_from.time)
   end
 
   def tags_string=(s : String)
     s.split(/,/).each do |t|
-      @tags << t.strip
+      v = t.strip
+      @tags << v if v != ""
     end
   end
 
   def save
+    Ocranizer::Collection.add(self)
+  end
+
+  def valid?
+    if time_from.error? || time_to.error? || name.size < 3
+      return false
+    else
+      return true
+    end
+  end
+
+  def duplicate?
+    Ocranizer::Collection.duplicate?(self)
   end
 
   def self.add_from_string(string : String)

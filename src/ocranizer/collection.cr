@@ -35,11 +35,17 @@ class Ocranizer::Collection
 
   def save
     # do a backup
-    FileUtils.mv(PATH, PATH_BACKUP)
+    FileUtils.mv(PATH, PATH_BACKUP) if File.exists?(PATH)
+
     # save to regular
     File.open(PATH, "w") do |f|
       f.puts(self.to_yaml)
     end
+  end
+
+  def incoming(max : Int32 = 20)
+    tf = Time.now.at_beginning_of_day
+    return @array.select{|e| e.time_from.at_beginning_of_day >= tf}.sort{|a,b| a.time_from.time <=> b.time_from.time }[0...max]
   end
 
   def self.add(e : Ocranizer::Event)
@@ -49,7 +55,16 @@ class Ocranizer::Collection
     c.save
   end
 
-  def incoming
-    return @array.select { |e| e.time_from }
+  def self.duplicate?(e : Ocranizer::Event)
+    c = new
+    c.load
+
+    return c.array.select{|f| e.name == f.name && e.time_from == f.time_from }.size > 0
+  end
+
+  def self.incoming(max : Int32 = 20)
+    c = new
+    c.load
+    return c.incoming(max: max)
   end
 end

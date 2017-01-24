@@ -135,6 +135,14 @@ struct Ocranizer::OcraTime
     return @time.to_s("%H:%M")
   end
 
+  def at_beginning_of_day
+    time.at_beginning_of_day
+  end
+
+  def at_end_of_day
+    time.at_end_of_day
+  end
+
   def self.parse_relative(s : String)
     is_okay = false
     t = Time::Span.new(0)
