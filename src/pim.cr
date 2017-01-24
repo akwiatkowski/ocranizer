@@ -6,7 +6,9 @@ require "./ocranizer/collection"
 b_incoming = false
 b_add = false
 b_force = false
+b_show = false
 
+s_id = String.new
 s_name = String.new
 s_time_from = String.new
 s_time_to = String.new
@@ -21,6 +23,11 @@ OptionParser.parse! do |parser|
   # commands
   parser.on("-i", "--incoming", "List of incoming events") { |s|
     b_incoming = true
+  }
+
+  parser.on("-s ID", "--show=ID", "Show event details") { |s|
+    b_show = true
+    s_id = s
   }
 
   parser.on("-a NAME", "--add=NAME", "Add event") { |s|
@@ -98,4 +105,9 @@ if b_incoming
   Ocranizer::Collection.incoming.each do |e|
     puts e.to_s_inline
   end
+end
+
+if b_show
+  e = Ocranizer::Collection.get(id: s_id)
+  puts e.to_s_full
 end

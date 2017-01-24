@@ -67,4 +67,10 @@ class Ocranizer::Collection
     c.load
     return c.incoming(max: max)
   end
+
+  def self.get(id : String)
+    c = new
+    c.load
+    return c.array.select{|e| e.id == id}.first
+  end
 end
