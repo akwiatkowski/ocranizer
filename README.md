@@ -4,11 +4,60 @@ Simple fast CLI organizer.
 
 ## Installation
 
-TODO: Write installation instructions here
+First `make` or `shards build pim`. Next you need to copy binary file into
+one of directories in `PATH` variable.
+
+You can use `make install` or `sudo cp -vn bin/pim /usr/bin`.
+
+Note: I'm not Mac user so this can be not Mac (or Unix) compatible because of
+user home path.
 
 ## Usage
 
-TODO: Write usage instructions here
+### List
+
+`pim -i` shows incoming events
+
+### Add
+
+`pim -a "Doctor appointment" -f "2017-02-05 12:00" -t "1 hour" -g "doctor" -c "appointment"`
+
+The result will be already added at `~/.ocranizer.yml`
+
+```
+Doctor appointment
+2017-02-05 12:00 -> 2017-02-05 13:00
+category: appointment
+tags: doctor
+Id: 20170124131927368
+```
+
+If you use `pim -i` you will get summary of all incoming events sorted by time:
+
+```
+Doctor appointment : 2017-02-05 12:00 - 2017-02-05 13:00 [20170124131927368] appointment, doctor
+```
+
+### Help
+
+`pim -h` will tell you about params
+
+### Human time form
+
+Please check [here](https://github.com/akwiatkowski/ocranizer/blob/master/spec/ocra_time_spec.cr)
+for details.
+
+You can use absolute values like:
+
+* `2017-10-10` for full day,
+* `2017-10-10 12:40` for exact,
+* `13:40` for current day
+
+or relative values like:
+
+* `1 week` - 1 week from now or event's time from
+* `prev 1 hour` - 1 hour before
+
 
 ## Development
 
