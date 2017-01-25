@@ -147,9 +147,29 @@ module Ocranizer::OrganizerEntity
     # no filters
     return true if params.keys.size == 0
 
-    # search for name
+    # name - substring, ignore case
     if params["name"]?
-      return false if self.name.index(params["name"]).nil?
+      return false if self.name.downcase.index(params["name"].downcase).nil?
+    end
+
+    # place - substring, ignore case
+    if params["place"]?
+      return false if self.place.downcase.index(params["place"].downcase).nil?
+    end
+
+    # desc - substring, ignore case
+    if params["desc"]?
+      return false if self.desc.downcase.index(params["desc"].downcase).nil?
+    end
+
+    # tag - exact, case
+    if params["tags"]?
+      return false if self.tags.index(params["tags"]).nil?
+    end
+
+    # category - exact, case
+    if params["category"]?
+      return false if self.category.strip != params["category"].strip
     end
 
     if params["time_from"]?
@@ -194,7 +214,14 @@ module Ocranizer::OrganizerEntity
 
       if self.as?(Ocranizer::Event)
         # Event must be within
-        return false if self.time_from.not_nil!.time < tf && self.time_to.not_nil!.time > tt
+        of = self.time_from.not_nil!.at_beginning
+        ot = self.time_to.not_nil!.at_end
+
+        if tf >= of && tt <= ot
+          # ok
+        else
+          return false
+        end
       end
 
       if self.as?(Ocranizer::Todo)
@@ -203,8 +230,17 @@ module Ocranizer::OrganizerEntity
         return false if self.time_from.nil?
         return false if self.time_to.nil?
 
+        # TODO add if one of them is Nil
+
         # if Todo has `time_from` it must be within
-        return false if self.time_from.not_nil!.time < tf && self.time_to.not_nil!.time > tt
+        of = self.time_from.not_nil!.at_beginning
+        ot = self.time_to.not_nil!.at_end
+
+        if tf >= of && tt <= ot
+          # ok
+        else
+          return false
+        end
       end
     end
 

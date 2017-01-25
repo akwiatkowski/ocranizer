@@ -7,7 +7,6 @@ require "./organizer_entity"
 
 class Ocranizer::Event
   include Ocranizer::OrganizerEntity
-  
   YAML.mapping(
     id: String,
     name: String,
@@ -31,5 +30,4 @@ class Ocranizer::Event
   end
 
   property :time_from, :time_to, :name, :desc, :place, :category
-
 end

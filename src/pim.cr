@@ -89,7 +89,7 @@ OptionParser.parse! do |parser|
     params["place"] = s
   }
 
-  parser.on("-c TAGS", "--category=CATEGORY", "Category") { |s|
+  parser.on("-c CATEGORY", "--category=CATEGORY", "Category") { |s|
     params["category"] = s
   }
 
@@ -97,7 +97,7 @@ OptionParser.parse! do |parser|
     params["tags"] = s
   }
 
-  parser.on("-d DESC", "--desc=DESC", "Desc") { |s|
+  parser.on("-e DESC", "--desc=DESC", "Desc") { |s|
     params["desc"] = s
   }
 
@@ -122,7 +122,6 @@ when COMMAND_ADD_EVENT, COMMAND_ADD_TODO
   e.save(force: "true" == params["force"]?)
 
   puts e.to_s_full
-
 when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
   c = Ocranizer::Collection.new
   c.load
@@ -136,7 +135,6 @@ when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
   array.each do |e|
     puts e.to_s_inline
   end
-
 end
 
 # ###
