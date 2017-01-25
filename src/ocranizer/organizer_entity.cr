@@ -8,13 +8,14 @@ module Ocranizer::OrganizerEntity
   property :time_from, :time_to, :name, :desc, :place, :category
 
   def update_attributes(params : Hash(String, String))
-    self.name = params["name"]
-    self.place = params["place"]
-    self.desc = params["desc"]
+    self.name = params["name"] if params["name"]?
+    self.place = params["place"] if params["place"]?
+    self.desc = params["desc"] if params["desc"]?
     self.time_from_string = params["time_from"] if params["time_from"]?
     self.time_to_string = params["time_to"] if params["time_to"]?
-    self.category = params["category"]
-    self.tags_string = params["tags"]
+    self.category = params["category"] if params["category"]?
+    self.tags_string = params["tags"] if params["tags"]?
+    self.update!
   end
 
   def to_s_full
@@ -133,6 +134,10 @@ module Ocranizer::OrganizerEntity
 
   def save!
     Ocranizer::Collection.add(self)
+  end
+
+  def update!
+    Ocranizer::Collection.update(self)
   end
 
   def valid?

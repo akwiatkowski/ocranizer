@@ -28,6 +28,14 @@ class Ocranizer::Collection
     @todos << e
   end
 
+  def remove(e : Ocranizer::Event)
+    @events = @events.select{|a| a.id != e.id }
+  end
+
+  def remove(e : Ocranizer::Todo)
+    @todos = @todos.select{|a| a.id != e.id }
+  end
+
   def load
     if File.exists?(PATH)
       # load regular
@@ -74,6 +82,14 @@ class Ocranizer::Collection
   def self.add(e : (Ocranizer::Event | Ocranizer::Todo))
     c = new
     c.load
+    c.add(e)
+    c.save
+  end
+
+  def self.update(e : (Ocranizer::Event | Ocranizer::Todo))
+    c = new
+    c.load
+    c.remove(e)
     c.add(e)
     c.save
   end

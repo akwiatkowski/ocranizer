@@ -11,7 +11,7 @@ COMMAND_ADD_EVENT    = 12
 COMMAND_SEARCH_TODO = 20
 COMMAND_ADD_TODO    = 22
 
-COMMAND_SHOW_DETAIL   = 30
+COMMAND_SHOW_UPDATE_DETAIL = 30
 
 COMMAND_SHOW_ALL = 5
 
@@ -54,8 +54,8 @@ OptionParser.parse! do |parser|
     params["name"] = s
   }
 
-  parser.on("-s ID", "--id=ID", "Show event/todo details") { |s|
-    command = COMMAND_SHOW_DETAIL
+  parser.on("-s ID", "--id=ID", "Show and update event/todo details") { |s|
+    command = COMMAND_SHOW_UPDATE_DETAIL
     params["id"] = s
   }
 
@@ -92,7 +92,7 @@ OptionParser.parse! do |parser|
     params["tags"] = s
   }
 
-  parser.on("-e DESC", "--desc=DESC", "Desc") { |s|
+  parser.on("-c DESC", "--desc=DESC", "Desc") { |s|
     params["desc"] = s
   }
 
@@ -102,7 +102,10 @@ OptionParser.parse! do |parser|
   # end of params
 
   # end
-  parser.on("-h", "--help", "Show this help") { puts parser }
+  parser.on("-h", "--help", "Show this help") {
+    puts parser
+    exit
+  }
 end
 
 case command
@@ -131,7 +134,6 @@ when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
   array.each do |e|
     puts e.to_s_inline
   end
-
 when COMMAND_INCOMING
   c = Ocranizer::Collection.new
   c.load
@@ -149,13 +151,18 @@ when COMMAND_INCOMING
   it.each do |e|
     puts e.to_s_inline
   end
-
-when COMMAND_SHOW_DETAIL
+when COMMAND_SHOW_UPDATE_DETAIL
   # TODO distinct Event from Todo
 
   e = Ocranizer::Collection.get_event(params["id"])
-  puts e.to_s_full if e
+  if e
+    e.update_attributes(params)
+    puts e.to_s_full
+  end
 
-  e = Ocranizer::Collection.get_todo(id: s_id)
-  puts e.to_s_full if e
+  e = Ocranizer::Collection.get_todo(params["id"])
+  if e
+    e.update_attributes(params)
+    puts e.to_s_full
+  end
 end
