@@ -6,12 +6,12 @@ require "./ocranizer/collection"
 COMMAND_INCOMING = 0
 
 COMMAND_SEARCH_EVENT = 10
-COMMAND_SHOW_EVENT   = 11
 COMMAND_ADD_EVENT    = 12
 
 COMMAND_SEARCH_TODO = 20
-COMMAND_SHOW_TODO   = 21
 COMMAND_ADD_TODO    = 22
+
+COMMAND_SHOW_DETAIL   = 30
 
 COMMAND_SHOW_ALL = 5
 
@@ -54,18 +54,13 @@ OptionParser.parse! do |parser|
     params["name"] = s
   }
 
-  ###
-  parser.on("-i", "--incoming", "List of incoming events and todos") { |s|
-    command = COMMAND_INCOMING
-  }
-
-  parser.on("-s ID", "--show=ID", "Show event details") { |s|
-    command = COMMAND_SHOW_EVENT
+  parser.on("-s ID", "--id=ID", "Show event/todo details") { |s|
+    command = COMMAND_SHOW_DETAIL
     params["id"] = s
   }
 
-  parser.on("-v", "--show-all", "Show all") {
-    command = COMMAND_SHOW_ALL
+  parser.on("-i", "--incoming", "List of incoming events and todos") { |s|
+    command = COMMAND_INCOMING
   }
 
   # params
@@ -122,6 +117,7 @@ when COMMAND_ADD_EVENT, COMMAND_ADD_TODO
   e.save(force: "true" == params["force"]?)
 
   puts e.to_s_full
+  # end
 when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
   c = Ocranizer::Collection.new
   c.load
@@ -135,49 +131,31 @@ when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
   array.each do |e|
     puts e.to_s_inline
   end
-end
 
-# ###
-# if COMMAND_INCOMING == command
-#   c = Ocranizer::Collection.new
-#   c.load
-#
-#   # events
-#   ie = c.incoming_events
-#   puts "Events (#{ie.size}/#{c.events.size}):"
-#   ie.each do |e|
-#     puts e.to_s_inline
-#   end
-#
-#   # todos
-#   it = c.incoming_todos
-#   puts "TODOs (#{it.size}/#{c.todos.size}):"
-#   it.each do |e|
-#     puts e.to_s_inline
-#   end
-# end
-#
-# if COMMAND_SHOW_EVENT == command
-#   e = Ocranizer::Collection.get_event(id: s_id)
-#   puts e.to_s_full
-# end
-#
-# if COMMAND_SHOW_TODO == command
-#   e = Ocranizer::Collection.get_todo(id: s_id)
-#   puts e.to_s_full
-# end
-#
-# if COMMAND_SHOW_ALL == command
-#   c = Ocranizer::Collection.new
-#   c.load
-#
-#   puts "Events (#{c.events.size}):"
-#   c.events.each do |e|
-#     puts e.to_s_inline
-#   end
-#
-#   puts "Todos (#{c.todos.size}): "
-#   c.todos.each do |e|
-#     puts e.to_s_inline
-#   end
-# end
+when COMMAND_INCOMING
+  c = Ocranizer::Collection.new
+  c.load
+
+  # events
+  ie = c.incoming_events
+  puts "Events (#{ie.size}/#{c.events.size}):"
+  ie.each do |e|
+    puts e.to_s_inline
+  end
+
+  # todos
+  it = c.incoming_todos
+  puts "TODOs (#{it.size}/#{c.todos.size}):"
+  it.each do |e|
+    puts e.to_s_inline
+  end
+
+when COMMAND_SHOW_DETAIL
+  # TODO distinct Event from Todo
+
+  e = Ocranizer::Collection.get_event(params["id"])
+  puts e.to_s_full if e
+
+  e = Ocranizer::Collection.get_todo(id: s_id)
+  puts e.to_s_full if e
+end

@@ -147,6 +147,11 @@ module Ocranizer::OrganizerEntity
     # no filters
     return true if params.keys.size == 0
 
+    # id - substring, ignore case
+    if params["id"]?
+      return false if self.id.downcase.index(params["id"].downcase).nil?
+    end
+
     # name - substring, ignore case
     if params["name"]?
       return false if self.name.downcase.index(params["name"].downcase).nil?

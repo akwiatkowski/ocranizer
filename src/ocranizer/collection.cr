@@ -107,12 +107,12 @@ class Ocranizer::Collection
   def self.get_event(id : String)
     c = new
     c.load
-    return c.events.select { |e| e.id == id }.first
+    return c.events.select { |e| e.id == id }[0]?
   end
 
   def self.get_todo(id : String)
     c = new
     c.load
-    return c.todos.select { |e| e.id == id }.first
+    return c.todos.select { |e| e.id == id }[0]?
   end
 end
