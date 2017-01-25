@@ -4,15 +4,21 @@ require "./ocranizer/event"
 require "./ocranizer/collection"
 
 COMMAND_INCOMING = 0
-COMMAND_SHOW_EVENT = 1
-COMMAND_ADD_EVENT = 2
-COMMAND_SHOW_TODO = 3
-COMMAND_ADD_TODO = 4
+
+COMMAND_SEARCH_EVENT = 10
+COMMAND_SHOW_EVENT   = 11
+COMMAND_ADD_EVENT    = 12
+
+COMMAND_SEARCH_TODO = 20
+COMMAND_SHOW_TODO   = 21
+COMMAND_ADD_TODO    = 22
+
 COMMAND_SHOW_ALL = 5
 
 command = COMMAND_INCOMING
 
 # parameters of Event or Todo
+params = Hash(String, String).new
 s_id = String.new
 s_name = String.new
 s_time_from = String.new
@@ -28,60 +34,75 @@ OptionParser.parse! do |parser|
   parser.banner = "Usage: salute [arguments]"
 
   # commands
-  parser.on("-i", "--incoming", "List of incoming events/todos") { |s|
+  parser.on("-E NAME", "--add-event=NAME", "Add event") { |s|
+    command = COMMAND_ADD_EVENT
+    params["name"] = s
+  }
+
+  parser.on("-e", "--search-events", "Search events") { |s|
+    command = COMMAND_SEARCH_EVENT
+    params["name"] = s
+  }
+
+  parser.on("-T NAME", "--add-todo=NAME", "Add TODO") { |s|
+    command = COMMAND_ADD_TODO
+    params["name"] = s
+  }
+
+  parser.on("-t", "--search-todos", "Search events") { |s|
+    command = COMMAND_SEARCH_TODO
+    params["name"] = s
+  }
+
+  ###
+  parser.on("-i", "--incoming", "List of incoming events and todos") { |s|
     command = COMMAND_INCOMING
   }
 
   parser.on("-s ID", "--show=ID", "Show event details") { |s|
     command = COMMAND_SHOW_EVENT
-    s_id = s
+    params["id"] = s
   }
 
   parser.on("-v", "--show-all", "Show all") {
     command = COMMAND_SHOW_ALL
   }
 
-  parser.on("-a NAME", "--add-event=NAME", "Add event") { |s|
-    command = COMMAND_ADD_EVENT
-    s_name = s
-  }
-
-  parser.on("-b NAME", "--add-todo=NAME", "Add TODO") { |s|
-    command = COMMAND_ADD_TODO
-    s_name = s
-  }
-
   # params
   parser.on("-n NAME", "--name=NAME", "Name of event/todo") { |s|
-    s_name = s
+    params["name"] = s
   }
 
-  parser.on("-f FROM", "--from=FROM", "Time from") { |s|
-    s_time_from = s
+  parser.on("-a FROM", "--from=FROM", "Time from") { |s|
+    params["time_from"] = s
   }
 
-  parser.on("-t TO", "--to=TO", "Time to") { |s|
-    s_time_to = s
+  parser.on("-z TO", "--to=TO", "Time to") { |s|
+    params["time_to"] = s
+  }
+
+  parser.on("-d DAY", "--day=DAY", "Filter only events/todos for one day") { |s|
+    params["day"] = s
   }
 
   parser.on("-p PLACE", "--place=PLACE", "Place") { |s|
-    s_place = s
+    params["place"] = s
   }
 
   parser.on("-c TAGS", "--category=CATEGORY", "Category") { |s|
-    s_category = s
+    params["category"] = s
   }
 
   parser.on("-g TAGS", "--tags=TAGS", "Tags ex: \"tag 1, tag 2\"") { |s|
-    s_tags = s
+    params["tags"] = s
   }
 
   parser.on("-d DESC", "--desc=DESC", "Desc") { |s|
-    s_desc = s
+    params["desc"] = s
   }
 
   parser.on("-F", "--force", "Force action") {
-    b_force = true
+    params["force"] = "true"
   }
   # end of params
 
@@ -90,70 +111,75 @@ OptionParser.parse! do |parser|
 end
 
 case command
-when COMMAND_ADD_EVENT, COMMAND_ADD_TODO then
+when COMMAND_ADD_EVENT, COMMAND_ADD_TODO
   if COMMAND_ADD_EVENT == command
     e = Ocranizer::Event.new
   else
     e = Ocranizer::Todo.new
   end
 
-  e.name = s_name
-  e.place = s_place
-  e.desc = s_desc
-  e.time_from_string = s_time_from
-  e.time_to_string = s_time_to
-  e.category = s_category
-  e.tags_string = s_tags
+  e.update_attributes(params)
+  e.save(force: "true" == params["force"]?)
 
   puts e.to_s_full
 
-  if e.valid?
-    if e.duplicate?
-      # valid, but duplicate
-      if b_force
-        puts "Duplicate, but add forced"
-        e.save
-      else
-        puts "Duplicate, not saving"
-      end
-    else
-      # valid and not duplicate
-      e.save
-    end
-  end
-end
-
-if COMMAND_INCOMING == command
-  Ocranizer::Collection.incoming_events.each do |e|
-    puts e.to_s_inline
-  end
-
-  Ocranizer::Collection.incoming_todos.each do |e|
-    puts e.to_s_inline
-  end
-end
-
-if COMMAND_SHOW_EVENT == command
-  e = Ocranizer::Collection.get_event(id: s_id)
-  puts e.to_s_full
-end
-
-if COMMAND_SHOW_TODO == command
-  e = Ocranizer::Collection.get_todo(id: s_id)
-  puts e.to_s_full
-end
-
-if COMMAND_SHOW_ALL == command
+when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
   c = Ocranizer::Collection.new
   c.load
 
-  puts "Events (#{c.events.size}):"
-  c.events.each do |e|
+  if COMMAND_SEARCH_EVENT == command
+    array = c.events(params)
+  else
+    array = c.todos(params)
+  end
+
+  array.each do |e|
     puts e.to_s_inline
   end
 
-  puts "Todos (#{c.todos.size}): "
-  c.todos.each do |e|
-    puts e.to_s_inline
-  end
 end
+
+# ###
+# if COMMAND_INCOMING == command
+#   c = Ocranizer::Collection.new
+#   c.load
+#
+#   # events
+#   ie = c.incoming_events
+#   puts "Events (#{ie.size}/#{c.events.size}):"
+#   ie.each do |e|
+#     puts e.to_s_inline
+#   end
+#
+#   # todos
+#   it = c.incoming_todos
+#   puts "TODOs (#{it.size}/#{c.todos.size}):"
+#   it.each do |e|
+#     puts e.to_s_inline
+#   end
+# end
+#
+# if COMMAND_SHOW_EVENT == command
+#   e = Ocranizer::Collection.get_event(id: s_id)
+#   puts e.to_s_full
+# end
+#
+# if COMMAND_SHOW_TODO == command
+#   e = Ocranizer::Collection.get_todo(id: s_id)
+#   puts e.to_s_full
+# end
+#
+# if COMMAND_SHOW_ALL == command
+#   c = Ocranizer::Collection.new
+#   c.load
+#
+#   puts "Events (#{c.events.size}):"
+#   c.events.each do |e|
+#     puts e.to_s_inline
+#   end
+#
+#   puts "Todos (#{c.todos.size}): "
+#   c.todos.each do |e|
+#     puts e.to_s_inline
+#   end
+# end

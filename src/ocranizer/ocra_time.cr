@@ -108,6 +108,10 @@ struct Ocranizer::OcraTime
     @type == TYPE_ERROR
   end
 
+  def full_day?
+    @type == TYPE_FULLDAY
+  end
+
   def not_error?
     !error?
   end
@@ -141,6 +145,16 @@ struct Ocranizer::OcraTime
 
   def at_end_of_day
     time.at_end_of_day
+  end
+
+  def at_beginning
+    return at_beginning_of_day if full_day?
+    return @time
+  end
+
+  def at_end
+    return at_end_of_day if full_day?
+    return @time
   end
 
   def self.parse_relative(s : String)
