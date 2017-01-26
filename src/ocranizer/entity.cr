@@ -125,23 +125,25 @@ module Ocranizer::Entity
         # valid, but duplicate
         if force
           puts "Duplicate, but add forced"
-          save!
+          return save!
         else
           puts "Duplicate, not saving"
+          return nil
         end
       else
         # valid and not duplicate
-        save!
+        return save!
       end
     end
+    return nil
   end
 
   def save!
-    Ocranizer::Collection.add(self)
+    return Ocranizer::Collection.add(self)
   end
 
   def update!
-    Ocranizer::Collection.update(self)
+    return Ocranizer::Collection.update(self)
   end
 
   def valid?

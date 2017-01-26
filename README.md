@@ -65,14 +65,40 @@ TODO: Ex: Allow to add `Event` when other user has free weekend
 Parameters described above behaves differently when used in **create** and
 **filter**.
 
+* `-n` or `--name` - substring, ignore case
+* `-i` or `--id` - substring, ignore case
+* `-a` or `--from` - filter within range
+* `-z` or `--to` - filter within range
+* `-d` or `--day` - filter overlapping day
+* `-p` or `--place` - substring, ignore case
+* `-c` or `--category` - exact, case
+* `-g` or `--tags` - exact, case
+* `-c` or `--desc` - substring, ignore case
+* `-u` or `--user` - described below
 
+#### User filter
+
+* `-u ""` - default filter only own `Entity`
+* `-u "rest"` - filter only other (not blank) users
+* `-u "all"` - show all: self and other
+* `-u "joe"` - show only `joe` entities
 
 #### Create params
 
+To create `Entity` you need to specify enough required parameters.
+`Todo` require only `name` but `Event` require `name`, `time_from` and `time_to`.
+
+Example: `pim -T "Clean room"`
+
+You can specify more information (except the `id` which is generated automatically).
+
+Example: `pim -T "Clean room" -c "apartment"`
 
 ### Add `Event`
 
 `pim -E "Doctor appointment" -a "2017-02-05 12:00" -z "1 hour" -g "doctor" -c "appointment"`
+
+# README is update till here, coming soon
 
 ### List
 
@@ -121,6 +147,7 @@ or relative values like:
 
 ## Development
 
+* [ ] TEST, TEST, TEST!!!
 * [ ] Delete action
 * [ ] Postpone - update but easier
 * [ ] Add own search configuration like macro, ex: `work_today` show all with `work` category and proper time ranges

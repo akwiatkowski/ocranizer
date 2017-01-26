@@ -11,7 +11,8 @@ COMMAND_ADD_EVENT    = 12
 COMMAND_SEARCH_TODO = 20
 COMMAND_ADD_TODO    = 22
 
-COMMAND_SHOW_UPDATE_DETAIL = 30
+COMMAND_SHOW_DETAIL   = 30
+COMMAND_UPDATE_DETAIL = 31
 
 COMMAND_SHOW_ALL = 5
 
@@ -54,8 +55,13 @@ OptionParser.parse! do |parser|
     params["name"] = s
   }
 
-  parser.on("-s ID", "--id=ID", "Show and update event/todo details") { |s|
-    command = COMMAND_SHOW_UPDATE_DETAIL
+  parser.on("-s ID", "--id=ID", "Show event/todo details") { |s|
+    command = COMMAND_SHOW_DETAIL
+    params["id"] = s
+  }
+
+  parser.on("-S ID", "--id=ID", "Update event/todo details") { |s|
+    command = COMMAND_UPDATE_DETAIL
     params["id"] = s
   }
 
@@ -125,8 +131,13 @@ when COMMAND_ADD_EVENT, COMMAND_ADD_TODO
   end
 
   e.update_attributes(params)
-  e.save(force: "true" == params["force"]?)
+  # `id` is made unique when adding to collection
+  # so it must be getted there
+  ne = e.save(force: "true" == params["force"]?)
 
+  if ne
+    e = ne.not_nil!
+  end
   puts e.to_s_full
   # end
 when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
@@ -159,18 +170,18 @@ when COMMAND_INCOMING
   it.each do |e|
     puts e.to_s_inline
   end
-when COMMAND_SHOW_UPDATE_DETAIL
+when COMMAND_SHOW_DETAIL, COMMAND_UPDATE_DETAIL
   # TODO distinct Event from Todo
 
   e = Ocranizer::Collection.get_event(params["id"])
   if e
-    e.update_attributes(params)
+    e.update_attributes(params) if COMMAND_UPDATE_DETAIL == command
     puts e.to_s_full
   end
 
   e = Ocranizer::Collection.get_todo(params["id"])
   if e
-    e.update_attributes(params)
+    e.update_attributes(params) if COMMAND_UPDATE_DETAIL == command
     puts e.to_s_full
   end
 end

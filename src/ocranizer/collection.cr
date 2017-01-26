@@ -21,19 +21,23 @@ class Ocranizer::Collection
   end
 
   def add(e : Ocranizer::Event)
-    @events << e
+    ne = make_id_uniq(e)
+    @events << ne
+    return ne
   end
 
   def add(e : Ocranizer::Todo)
-    @todos << e
+    ne = make_id_uniq(e)
+    @todos << ne
+    return ne
   end
 
   def remove(e : Ocranizer::Event)
-    @events = @events.select{|a| a.id != e.id }
+    @events = @events.select { |a| a.id != e.id }
   end
 
   def remove(e : Ocranizer::Todo)
-    @todos = @todos.select{|a| a.id != e.id }
+    @todos = @todos.select { |a| a.id != e.id }
   end
 
   def load
@@ -58,6 +62,18 @@ class Ocranizer::Collection
     File.open(PATH, "w") do |f|
       f.puts(self.to_yaml)
     end
+  end
+
+  def is_id_uniq?(id : String)
+    return false == (@events.map(&.id) + @todos.map(&.id)).includes?(id)
+  end
+
+  # Add random number as long as `id` will be unique
+  def make_id_uniq(e : Ocranizer::Entity)
+    while false == is_id_uniq?(e.id)
+      e.id += rand(10).to_s
+    end
+    return e
   end
 
   def events(params : Hash)
