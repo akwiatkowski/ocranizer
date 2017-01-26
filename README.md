@@ -14,13 +14,73 @@ user home path.
 
 ## Usage
 
+### Main types - entities
+
+`Event` is a time range when something occurs. It's described by time and the time
+defines when `Event` occurs.
+
+`Todo` is a task which must be completed. It can be described by time. `Todo`
+can have (but not need to have) deadline - `time_to` and can be started after
+time point - `time_to`.
+
+`Event` and `Todo` is an `Entity`.
+
+### Command parameters styles
+
+#### Destructive actions
+
+Most destructive commands are uppercase. For example if you want to search an
+`Event` you use `pim -e`, but if you want to add you should use uppercase `E`
+like `pim -E`.
+
+#### Parameters
+
+There is predefined list of possible parameters. They can be used to
+**filter**, **create**, **update** and **delete** depends on command.
+
+TODO: Delete is not implemented yet
+
+Theese parameters are:
+
+* `-n` or `--name` - name/title
+* `-i` or `--id` - unique identifier of an `Entity`
+* `-a` or `--from` - start time
+* `-z` or `--to` - end time
+* `-d` or `--day` - only for filtering for particular day
+* `-p` or `--place` - place
+* `-c` or `--category` - category, just one `String` like `work`, `private`
+* `-g` or `--tags` - tags, `Array(String)` but you should type them in one `String` separated with coma `,`
+* `-c` or `--desc` - longer description of `Entity`, totally optional
+* `-u` or `--user` - other people `Entities`
+
+#### What is User
+
+Imagine you have friend you often travel with. You can add his blocking events
+here. You can later get his all events and know when he is available.
+
+TODO: Ex: Allow to add `Event` when other user has free weekend
+
+#### Filter params
+
+Parameters described above behaves differently when used in **create** and
+**filter**.
+
+
+
+#### Create params
+
+
+### Add `Event`
+
+`pim -E "Doctor appointment" -a "2017-02-05 12:00" -z "1 hour" -g "doctor" -c "appointment"`
+
 ### List
 
 `pim -i` shows incoming events
 
 ### Add
 
-`pim -a "Doctor appointment" -f "2017-02-05 12:00" -t "1 hour" -g "doctor" -c "appointment"`
+
 
 The result will be already added at `~/.ocranizer.yml`
 
@@ -60,6 +120,14 @@ or relative values like:
 
 
 ## Development
+
+* [ ] Delete action
+* [ ] Postpone - update but easier
+* [ ] Add own search configuration like macro, ex: `work_today` show all with `work` category and proper time ranges
+* [ ] When adding `Entity`
+* [ ] Update `id` to make it always unique for `Event` and `Todo`
+
+
 
 * [ ] Add events, todos using command line interface
 * [ ] Inteligent time parser: full, partial, words like tommorow, +1 day, +1 week

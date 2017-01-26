@@ -64,6 +64,10 @@ OptionParser.parse! do |parser|
   }
 
   # params
+  parser.on("-j ID", "--id=ID", "Filter by ID") { |s|
+    params["id"] = s
+  }
+
   parser.on("-n NAME", "--name=NAME", "Name of event/todo") { |s|
     params["name"] = s
   }
@@ -94,6 +98,10 @@ OptionParser.parse! do |parser|
 
   parser.on("-c DESC", "--desc=DESC", "Desc") { |s|
     params["desc"] = s
+  }
+
+  parser.on("-u USER", "--user=NAME", "Default user is blank. This allow you to have someone else events") { |s|
+    params["user"] = s
   }
 
   parser.on("-F", "--force", "Force action") {

@@ -4,10 +4,14 @@ require "colorize"
 require "./ocra_time"
 require "./collection"
 
-module Ocranizer::OrganizerEntity
-  property :time_from, :time_to, :name, :desc, :place, :category
+module Ocranizer::Entity
+  DEFAULT_USER = ""
+
+  property :user, :time_from, :time_to, :name, :desc, :place, :category
 
   def update_attributes(params : Hash(String, String))
+    # NOTE: id cannot be changed
+    self.user = params["user"] if params["user"]?
     self.name = params["name"] if params["name"]?
     self.place = params["place"] if params["place"]?
     self.desc = params["desc"] if params["desc"]?
@@ -151,6 +155,22 @@ module Ocranizer::OrganizerEntity
   def filter_hash?(params : Hash)
     # no filters
     return true if params.keys.size == 0
+
+    # user - "all" return from all user, "rest" return only not blank users,
+    # "<user>" return only <user>, ""/nil return self because blank is the "I" user
+
+    if nil == params["user"]? || DEFAULT_USER == params["user"]?
+      # show only "I"
+      return false if self.user != DEFAULT_USER
+    elsif "all" == params["user"]
+      # show all
+      # not return false, move to rest filters
+    elsif "rest" == params["user"]
+      return false if self.user == DEFAULT_USER
+    else
+      # show only <user>
+      return false if self.user != params["user"]
+    end
 
     # id - substring, ignore case
     if params["id"]?

@@ -2,4 +2,4 @@ default:
 	shards build pim
 
 install:
-	sudo cp -vn bin/pim /usr/bin
+	sudo cp -vi bin/pim /usr/bin
