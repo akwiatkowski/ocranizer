@@ -14,6 +14,7 @@ COMMAND_ADD_TODO    = 22
 
 COMMAND_SHOW_DETAIL   = 30
 COMMAND_UPDATE_DETAIL = 31
+COMMAND_DELETE = 32
 
 COMMAND_GENERATE_HTML = 40
 
@@ -63,6 +64,11 @@ OptionParser.parse! do |parser|
 
   parser.on("-S ID", "--id=ID", "Update event/todo details") { |s|
     command = COMMAND_UPDATE_DETAIL
+    params["id"] = s
+  }
+
+  parser.on("-D ID", "--delete=ID", "Delete event/todo") { |s|
+    command = COMMAND_DELETE
     params["id"] = s
   }
 
@@ -191,6 +197,24 @@ when COMMAND_SHOW_DETAIL, COMMAND_UPDATE_DETAIL
     e.update_attributes(params) if COMMAND_UPDATE_DETAIL == command
     puts e.to_s_full
   end
+when COMMAND_DELETE
+  c = Ocranizer::Collection.new
+  c.load
+  e = c.get_event(params["id"])
+  if e
+    c.remove(e)
+    puts "DELETED"
+    puts e.to_s_full
+  end
+
+  e = c.get_todo(params["id"])
+  if e
+    c.remove(e)
+    puts "DELETED"
+    puts e.to_s_full
+  end
+
+  c.save
 when COMMAND_GENERATE_HTML
   e = Ocranizer::Collection.new
   e.load

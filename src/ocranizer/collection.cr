@@ -144,15 +144,23 @@ class Ocranizer::Collection
     return c.incoming_todos(max: max)
   end
 
+  def get_event(id : String)
+    return self.events.select { |e| e.id == id }[0]?
+  end
+
   def self.get_event(id : String)
     c = new
     c.load
-    return c.events.select { |e| e.id == id }[0]?
+    return c.get_event(id)
+  end
+
+  def get_todo(id : String)
+    return self.todos.select { |e| e.id == id }[0]?
   end
 
   def self.get_todo(id : String)
     c = new
     c.load
-    return c.todos.select { |e| e.id == id }[0]?
+    return c.get_todo(id)
   end
 end
