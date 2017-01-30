@@ -85,11 +85,11 @@ class Ocranizer::Collection
   end
 
   def events(params : Hash)
-    events.select { |e| e.filter_hash?(params) }
+    events.sort.select { |e| e.filter_hash?(params) }
   end
 
   def todos(params : Hash)
-    todos.select { |e| e.filter_hash?(params) }
+    todos.sort.select { |e| e.filter_hash?(params) }
   end
 
   def incoming_events(max : Int32 = 20)

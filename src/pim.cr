@@ -106,6 +106,10 @@ OptionParser.parse! do |parser|
     params["desc"] = s
   }
 
+  parser.on("-b URL", "--url=URL", "URL") { |s|
+    params["url"] = s
+  }
+
   parser.on("-u USER", "--user=NAME", "Default user is blank. This allow you to have someone else events") { |s|
     params["user"] = s
   }

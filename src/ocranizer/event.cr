@@ -17,7 +17,8 @@ class Ocranizer::Event
     category: String,
     tags: Array(String),
     time_from: OcraTime,
-    time_to: OcraTime
+    time_to: OcraTime,
+    url: (String | Nil)
   )
 
   def initialize
@@ -35,12 +36,12 @@ class Ocranizer::Event
     @tags = Array(String).new
   end
 
-  property :user, :time_from, :time_to, :name, :desc, :place, :category
+  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url
 
   def <=>(other) : Int32
     if self.time_from > other.time_from
       return 1
-    elsif self.time_from > other.time_from
+    elsif self.time_from < other.time_from
       return -1
     end
     return self.name <=> other.name

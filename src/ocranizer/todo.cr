@@ -17,7 +17,8 @@ class Ocranizer::Todo
     category: String,
     tags: Array(String),
     time_from: (OcraTime | Nil),
-    time_to: (OcraTime | Nil)
+    time_to: (OcraTime | Nil),
+    url: (String | Nil)
   )
 
   def initialize
@@ -37,7 +38,7 @@ class Ocranizer::Todo
     @tags = Array(String).new
   end
 
-  property :user, :time_from, :time_to, :name, :desc, :place, :category
+  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url
 
   def <=>(other) : Int32
     if self.time_from.nil?
@@ -59,7 +60,7 @@ class Ocranizer::Todo
 
     if self.time_to.not_nil! > other.time_to.not_nil!
       return 1
-    elsif self.time_to.not_nil! > other.time_to.not_nil!
+    elsif self.time_to.not_nil! < other.time_to.not_nil!
       return -1
     end
     return self.name <=> other.name

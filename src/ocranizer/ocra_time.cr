@@ -68,6 +68,27 @@ struct Ocranizer::OcraTime
     rescue Time::Format::Error
     end
 
+    # mm-dd, only day for current year
+    # NOTE: enforce time > now
+    begin
+      parsed = Time.parse(time: s, pattern: "%m-%d", kind: Time::Kind::Local)
+      parsed = Time.new(
+        year: Time.now.year,
+        month: parsed.month,
+        day: parsed.day,
+        hour: parsed.hour,
+        minute: parsed.minute,
+        kind: Time::Kind::Local
+      )
+      if parsed < Time.now
+        # add 1 year because time cannot be in past
+        parsed = add_relative_interval(time: parsed, span: YEAR_SPAN)
+      end
+
+      return new(base_time: parsed, relative: relative, type: TYPE_FULLDAY)
+    rescue Time::Format::Error
+    end
+
     # HH:MM, only hour
     begin
       parsed = Time.parse(time: s, pattern: "%H:%M", kind: Time::Kind::Local)
@@ -162,7 +183,7 @@ struct Ocranizer::OcraTime
   end
 
   def <(other)
-    return self.self < other.time
+    return self.time < other.time
   end
 
   # parsing code
@@ -267,6 +288,22 @@ struct Ocranizer::OcraTime
     end
 
     if span == YEAR_SPAN
+      begin
+        result_time = Time.new(
+          time.year + 1,
+          time.month,
+          time.day,
+          time.hour,
+          time.minute
+        )
+        return result_time
+      rescue e
+        if e.message == "invalid time"
+          return time + span
+        else
+          raise e
+        end
+      end
     end
 
     return time + span

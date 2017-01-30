@@ -7,7 +7,7 @@ require "./collection"
 module Ocranizer::Entity
   DEFAULT_USER = ""
 
-  property :user, :time_from, :time_to, :name, :desc, :place, :category
+  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url
 
   def update_attributes(params : Hash(String, String))
     # NOTE: id cannot be changed
@@ -19,6 +19,7 @@ module Ocranizer::Entity
     self.time_to_string = params["time_to"] if params["time_to"]?
     self.category = params["category"] if params["category"]?
     self.tags_string = params["tags"] if params["tags"]?
+    self.url = params["url"] if params["url"]?
     self.update!
   end
 
@@ -46,6 +47,12 @@ module Ocranizer::Entity
       if self.desc.size > 0
         s << "details: "
         s << self.desc.colorize(:yellow).to_s
+        s << "\n"
+      end
+
+      if self.url.to_s.size > 0
+        s << "URL: "
+        s << self.url.colorize(:blue).to_s
         s << "\n"
       end
 
