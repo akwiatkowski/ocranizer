@@ -23,12 +23,14 @@ class Ocranizer::Collection
   def add(e : Ocranizer::Event)
     ne = make_id_uniq(e)
     @events << ne
+    @events.sort!
     return ne
   end
 
   def add(e : Ocranizer::Todo)
     ne = make_id_uniq(e)
     @todos << ne
+    @todos.sort!
     return ne
   end
 
@@ -46,11 +48,17 @@ class Ocranizer::Collection
       o = Ocranizer::Collection.from_yaml(File.read(PATH))
       @events = o.events
       @todos = o.todos
+
+      @events.sort!
+      @todos.sort!
     elsif File.exists?(PATH_BACKUP)
       # try loading backup
       o = Ocranizer::Collection.from_yaml(File.read(PATH_BACKUP))
       @events = o.events
       @todos = o.todos
+
+      @events.sort!
+      @todos.sort!
     end
   end
 

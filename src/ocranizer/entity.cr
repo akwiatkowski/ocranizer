@@ -282,4 +282,20 @@ module Ocranizer::Entity
   def duplicate?
     Ocranizer::Collection.duplicate?(self)
   end
+
+  def >(other)
+    (self <=> other) == 1
+  end
+
+  def <(other)
+    (self <=> other) == -1
+  end
+
+  def >=(other)
+    (self <=> other) == 1 || (self <=> other) == 0
+  end
+
+  def <=(other)
+    (self <=> other) == -1 || (self <=> other) == 0
+  end
 end

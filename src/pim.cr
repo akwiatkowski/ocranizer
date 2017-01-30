@@ -171,8 +171,6 @@ when COMMAND_INCOMING
     puts e.to_s_inline
   end
 when COMMAND_SHOW_DETAIL, COMMAND_UPDATE_DETAIL
-  # TODO distinct Event from Todo
-
   e = Ocranizer::Collection.get_event(params["id"])
   if e
     e.update_attributes(params) if COMMAND_UPDATE_DETAIL == command

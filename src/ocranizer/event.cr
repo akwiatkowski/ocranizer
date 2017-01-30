@@ -36,4 +36,13 @@ class Ocranizer::Event
   end
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category
+
+  def <=>(other) : Int32
+    if self.time_from > other.time_from
+      return 1
+    elsif self.time_from > other.time_from
+      return -1
+    end
+    return self.name <=> other.name
+  end
 end

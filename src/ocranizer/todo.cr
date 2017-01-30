@@ -38,4 +38,30 @@ class Ocranizer::Todo
   end
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category
+
+  def <=>(other) : Int32
+    if self.time_from.nil?
+      if other.time_from.nil?
+        # compare name if not time_from
+        return self.name <=> other.name
+      else
+        # other has `time_from` - always bigger prior
+        return -1
+      end
+    else
+      if other.time_from.nil?
+        # compare name if not time_from
+        return 1
+      else
+        # both of `time_to` is not null
+      end
+    end
+
+    if self.time_to.not_nil! > other.time_to.not_nil!
+      return 1
+    elsif self.time_to.not_nil! > other.time_to.not_nil!
+      return -1
+    end
+    return self.name <=> other.name
+  end
 end

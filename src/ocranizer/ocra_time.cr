@@ -157,6 +157,15 @@ struct Ocranizer::OcraTime
     return @time
   end
 
+  def >(other)
+    return self.time > other.time
+  end
+
+  def <(other)
+    return self.self < other.time
+  end
+
+  # parsing code
   def self.parse_relative(s : String)
     is_okay = false
     t = Time::Span.new(0)
