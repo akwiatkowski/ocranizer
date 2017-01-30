@@ -2,6 +2,7 @@ require "option_parser"
 
 require "./ocranizer/event"
 require "./ocranizer/collection"
+require "./ocranizer/html_generator"
 
 COMMAND_INCOMING = 0
 
@@ -14,7 +15,7 @@ COMMAND_ADD_TODO    = 22
 COMMAND_SHOW_DETAIL   = 30
 COMMAND_UPDATE_DETAIL = 31
 
-COMMAND_SHOW_ALL = 5
+COMMAND_GENERATE_HTML = 40
 
 command = COMMAND_INCOMING
 
@@ -67,6 +68,10 @@ OptionParser.parse! do |parser|
 
   parser.on("-i", "--incoming", "List of incoming events and todos") { |s|
     command = COMMAND_INCOMING
+  }
+
+  parser.on("-H", "--html", "Generate HTML") { |s|
+    command = COMMAND_GENERATE_HTML
   }
 
   # params
@@ -186,4 +191,10 @@ when COMMAND_SHOW_DETAIL, COMMAND_UPDATE_DETAIL
     e.update_attributes(params) if COMMAND_UPDATE_DETAIL == command
     puts e.to_s_full
   end
+when COMMAND_GENERATE_HTML
+  e = Ocranizer::Collection.new
+  e.load
+
+  g = Ocranizer::HtmlGenerator.new(e)
+  g.make_it_so
 end

@@ -305,4 +305,23 @@ module Ocranizer::Entity
   def <=(other)
     (self <=> other) == -1 || (self <=> other) == 0
   end
+
+  def is_within?(day : Time) : Bool
+    # TODO: add Todo with one time
+    return false if self.time_to.nil? || self.time_from.nil?
+
+    t = day.at_beginning_of_day
+    tf = self.time_from.not_nil!.time.at_beginning_of_day
+    tt = self.time_to.not_nil!.time.at_end_of_day
+
+    # daytime is within Entity range
+    return true if t >= tf && t <= tt
+
+    if t.at_beginning_of_day == tf.at_beginning_of_day ||
+       t.at_beginning_of_day == tt.at_beginning_of_day
+      return true
+    end
+
+    return false
+  end
 end
