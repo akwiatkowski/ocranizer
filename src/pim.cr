@@ -219,6 +219,6 @@ when COMMAND_GENERATE_HTML
   e = Ocranizer::Collection.new
   e.load
 
-  g = Ocranizer::HtmlGenerator.new(e)
+  g = Ocranizer::HtmlGenerator.new(collection: e, params: params)
   g.make_it_so
 end

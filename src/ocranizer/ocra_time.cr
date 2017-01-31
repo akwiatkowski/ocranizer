@@ -137,6 +137,10 @@ struct Ocranizer::OcraTime
     !error?
   end
 
+  def not_full_day?
+    !full_day?
+  end
+
   # human type
   def to_human
     case @type
