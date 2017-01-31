@@ -176,6 +176,9 @@ class Ocranizer::CommandOptionParser
   private def execute_after_parse
     case @command
     when COMMAND_ADD_EVENT, COMMAND_ADD_TODO
+      c = Ocranizer::Collection.new
+      c.load
+
       if COMMAND_ADD_EVENT == @command
         e = Ocranizer::Event.new
       else
@@ -185,7 +188,7 @@ class Ocranizer::CommandOptionParser
       e.update_attributes(@params)
       # `id` is made unique when adding to collection
       # so it must be getted there
-      ne = e.save(force: "true" == @params["force"]?)
+      ne = c.add(entity: e, force: "true" == @params["force"]?)
 
       if ne
         e = ne.not_nil!
@@ -206,13 +209,16 @@ class Ocranizer::CommandOptionParser
 
       return render_array_of_entities(array)
     when COMMAND_SHOW_DETAIL, COMMAND_UPDATE_DETAIL
-      e = Ocranizer::Collection.get_event(@params["id"])
+      c = Ocranizer::Collection.new
+      c.load
+
+      e = c.get_event(@params["id"])
       if e
         e.update_attributes(@params) if COMMAND_UPDATE_DETAIL == @command
         return render_detailed_entity(e)
       end
 
-      e = Ocranizer::Collection.get_todo(@params["id"])
+      e = c.get_todo(@params["id"])
       if e
         e.update_attributes(@params) if COMMAND_UPDATE_DETAIL == @command
         return render_detailed_entity(e)

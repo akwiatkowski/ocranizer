@@ -20,7 +20,6 @@ module Ocranizer::Entity
     self.category = params["category"] if params["category"]?
     self.tags_string = params["tags"] if params["tags"]?
     self.url = params["url"] if params["url"]?
-    self.update!
   end
 
   def to_s_full
@@ -124,33 +123,6 @@ module Ocranizer::Entity
       v = t.strip
       @tags << v if v != ""
     end
-  end
-
-  def save(force : Bool = false)
-    if self.valid?
-      if self.duplicate?
-        # valid, but duplicate
-        if force
-          # puts "Duplicate, but add forced"
-          return save!
-        else
-          # puts "Duplicate, not saving"
-          return nil
-        end
-      else
-        # valid and not duplicate
-        return save!
-      end
-    end
-    return nil
-  end
-
-  def save!
-    return Ocranizer::Collection.add(self)
-  end
-
-  def update!
-    return Ocranizer::Collection.update(self)
   end
 
   def valid?
@@ -289,12 +261,6 @@ module Ocranizer::Entity
     end
 
     return true
-  end
-
-  def duplicate?
-    pp self
-
-    Ocranizer::Collection.duplicate?(self)
   end
 
   def >(other)

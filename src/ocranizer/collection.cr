@@ -38,18 +38,37 @@ class Ocranizer::Collection
     @todos = Array(Ocranizer::Todo).new
   end
 
-  def add(e : Ocranizer::Event)
+  def add!(e : Ocranizer::Event)
     ne = make_id_uniq(e)
     @events << ne
     @events.sort!
     return ne
   end
 
-  def add(e : Ocranizer::Todo)
+  def add!(e : Ocranizer::Todo)
     ne = make_id_uniq(e)
     @todos << ne
     @todos.sort!
     return ne
+  end
+
+  def add(entity : (Ocranizer::Event | Ocranizer::Todo), force : Bool = false)
+    if entity.valid?
+      if duplicate?(entity)
+        # valid, but duplicate
+        if force
+          # puts "Duplicate, but add forced"
+          return add!(entity)
+        else
+          # puts "Duplicate, not saving"
+          return nil
+        end
+      else
+        # valid and not duplicate
+        return add!(entity)
+      end
+    end
+    return nil
   end
 
   def remove(e : Ocranizer::Event)
@@ -121,64 +140,15 @@ class Ocranizer::Collection
     return todos[0...max]
   end
 
-  def self.add(e : (Ocranizer::Event | Ocranizer::Todo))
-    c = new
-    c.load
-    c.add(e)
-    c.save
-  end
-
-  def self.update(e : (Ocranizer::Event | Ocranizer::Todo))
-    c = new
-    c.load
-    c.remove(e)
-    c.add(e)
-    c.save
-  end
-
-  def self.duplicate?(e : Ocranizer::Event)
-    c = new
-    c.load
-
-    return c.events.select { |f| e.name == f.name && e.time_from == f.time_from }.size > 0
-  end
-
-  def self.duplicate?(e : Ocranizer::Todo)
-    c = new
-    c.load
-
-    return c.events.select { |f| e.name == f.name && e.time_from == f.time_from }.size > 0
-  end
-
-  def self.incoming_events(max : Int32 = 20)
-    c = new
-    c.load
-    return c.incoming_events(max: max)
-  end
-
-  def self.incoming_todos(max : Int32 = 20)
-    c = new
-    c.load
-    return c.incoming_todos(max: max)
+  def duplicate?(e : (Ocranizer::Event | Ocranizer::Todo))
+    return (self.events + self.todos).select { |f| e.name == f.name && e.time_from == f.time_from }.size > 0
   end
 
   def get_event(id : String)
     return self.events.select { |e| e.id == id }[0]?
   end
 
-  def self.get_event(id : String)
-    c = new
-    c.load
-    return c.get_event(id)
-  end
-
   def get_todo(id : String)
     return self.todos.select { |e| e.id == id }[0]?
-  end
-
-  def self.get_todo(id : String)
-    c = new
-    c.load
-    return c.get_todo(id)
   end
 end

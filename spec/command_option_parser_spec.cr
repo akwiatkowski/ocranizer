@@ -57,6 +57,18 @@ describe Ocranizer::CommandOptionParser do
     parser = parser_json
     result = parser.parse(input: a)
 
-    pp result
+    json = JSON.parse(result.as(String))
+    json["name"].should eq name
+
+    # check if list is empty
+    a = initial_config_array
+    a += ["-e"]
+    parser = parser_json
+    result = parser.parse(input: a)
+
+    json = JSON.parse(result.as(String))
+    # json.size.should eq 0
+
+    puts json
   end
 end
