@@ -191,6 +191,10 @@ class Ocranizer::CommandOptionParser
       ne = c.add(entity: e, force: "true" == @params["force"]?)
 
       if ne
+        # was added, valid and not duplicate
+        # save to config file
+        c.save
+        # return
         e = ne.not_nil!
         return render_detailed_entity(e)
       end

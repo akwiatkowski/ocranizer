@@ -67,8 +67,7 @@ describe Ocranizer::CommandOptionParser do
     result = parser.parse(input: a)
 
     json = JSON.parse(result.as(String))
-    # json.size.should eq 0
-
-    puts json
+    json.size.should eq 1
+    json[0]["name"].should eq name
   end
 end
