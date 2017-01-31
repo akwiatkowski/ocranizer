@@ -21,6 +21,19 @@ class Ocranizer::Todo
     url: (String | Nil)
   )
 
+  JSON.mapping(
+    id: String,
+    user: String,
+    name: String,
+    place: String,
+    desc: String,
+    category: String,
+    tags: Array(String),
+    time_from: (OcraTime | Nil),
+    time_to: (OcraTime | Nil),
+    url: (String | Nil)
+  )
+
   def initialize
     @id = Time.now.to_s("%Y%m%d%H%M%S%L")
     @user = ""

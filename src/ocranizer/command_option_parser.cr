@@ -4,7 +4,7 @@ require "./event"
 require "./collection"
 require "./html_generator"
 
-class CommandOptionParser
+class Ocranizer::CommandOptionParser
   COMMAND_NULL = 0
 
   COMMAND_SEARCH_EVENT = 10
@@ -19,9 +19,12 @@ class CommandOptionParser
 
   COMMAND_GENERATE_HTML = 40
 
+  FORMAT_CLI = 0
+  FORMAT_JSON = 1
+
   @parser : OptionParser
 
-  def initialize
+  def initialize(@format = FORMAT_CLI)
     @command = COMMAND_NULL
     # parameters of Event or Todo
     @params = Hash(String, String).new
@@ -133,9 +136,44 @@ class CommandOptionParser
 
   def parse(input = ARGV)
     @parser.parse(input)
+
+    return execute_after_parse
   end
 
-  def execute_after_parse
+  def cli?
+    @format == FORMAT_CLI
+  end
+
+  def json?
+    @format == FORMAT_JSON
+  end
+
+  def render_detailed_entity(e)
+    if cli?
+      return e.to_s_full
+    end
+
+    if json?
+      return e.to_json
+    end
+  end
+
+  def render_array_of_entities(array)
+    if cli?
+      return String.build do |str|
+        array.each do |e|
+          str << e.to_s_inline
+          str << "\n"
+        end
+      end
+    end
+
+    if json?
+      return array.to_json
+    end
+  end
+
+  private def execute_after_parse
     case @command
     when COMMAND_ADD_EVENT, COMMAND_ADD_TODO
       if COMMAND_ADD_EVENT == @command
@@ -151,8 +189,10 @@ class CommandOptionParser
 
       if ne
         e = ne.not_nil!
+        return render_detailed_entity(e)
       end
-      puts e.to_s_full
+
+      return nil
       # end
     when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
       c = Ocranizer::Collection.new
@@ -164,39 +204,39 @@ class CommandOptionParser
         array = c.todos(@params)
       end
 
-      array.each do |e|
-        puts e.to_s_inline
-      end
+      return render_array_of_entities(array)
     when COMMAND_SHOW_DETAIL, COMMAND_UPDATE_DETAIL
       e = Ocranizer::Collection.get_event(@params["id"])
       if e
         e.update_attributes(@params) if COMMAND_UPDATE_DETAIL == @command
-        puts e.to_s_full
+        return render_detailed_entity(e)
       end
 
       e = Ocranizer::Collection.get_todo(@params["id"])
       if e
         e.update_attributes(@params) if COMMAND_UPDATE_DETAIL == @command
-        puts e.to_s_full
+        return render_detailed_entity(e)
       end
+
+      return nil
     when COMMAND_DELETE
       c = Ocranizer::Collection.new
       c.load
       e = c.get_event(@params["id"])
       if e
         c.remove(e)
-        puts "DELETED"
-        puts e.to_s_full
+        c.save
+        return render_detailed_entity(e)
       end
 
       e = c.get_todo(@params["id"])
       if e
         c.remove(e)
-        puts "DELETED"
-        puts e.to_s_full
+        c.save
+        return render_detailed_entity(e)
       end
 
-      c.save
+      return nil
     when COMMAND_GENERATE_HTML
       e = Ocranizer::Collection.new
       e.load

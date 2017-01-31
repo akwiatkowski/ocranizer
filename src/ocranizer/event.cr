@@ -1,4 +1,5 @@
 require "yaml"
+require "json"
 require "colorize"
 
 require "./ocra_time"
@@ -9,6 +10,19 @@ class Ocranizer::Event
   include Ocranizer::Entity
 
   YAML.mapping(
+    id: String,
+    user: String,
+    name: String,
+    place: String,
+    desc: String,
+    category: String,
+    tags: Array(String),
+    time_from: OcraTime,
+    time_to: OcraTime,
+    url: (String | Nil)
+  )
+
+  JSON.mapping(
     id: String,
     user: String,
     name: String,

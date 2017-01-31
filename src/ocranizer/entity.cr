@@ -292,6 +292,8 @@ module Ocranizer::Entity
   end
 
   def duplicate?
+    pp self
+
     Ocranizer::Collection.duplicate?(self)
   end
 

@@ -1,7 +1,4 @@
-require "option_parser"
+require "./ocranizer"
 
-require "./ocranizer/command_option_parser"
-
-c = CommandOptionParser.new
-c.parse(input: ARGV)
-c.execute_after_parse
+c = Ocranizer::CommandOptionParser.new
+puts c.parse(input: ARGV)

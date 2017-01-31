@@ -31,6 +31,11 @@ struct Ocranizer::OcraTime
     }
   )
 
+  JSON.mapping(
+    type: Int32 | Nil,
+    time: Time
+  )
+
   # constructors, factories
   def self.new_error
     new(time: now_normalized, type: TYPE_ERROR)
