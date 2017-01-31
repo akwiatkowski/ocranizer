@@ -38,8 +38,6 @@ like `pim -E`.
 There is predefined list of possible parameters. They can be used to
 **filter**, **create**, **update** and **delete** depends on command.
 
-TODO: Delete is not implemented yet
-
 Theese parameters are:
 
 * `-n` or `--name` - name/title
@@ -52,13 +50,12 @@ Theese parameters are:
 * `-g` or `--tags` - tags, `Array(String)` but you should type them in one `String` separated with coma `,`
 * `-c` or `--desc` - longer description of `Entity`, totally optional
 * `-u` or `--user` - other people `Entities`
+* `-b` or `--url` - external http link for `Entity`
 
-#### What is User
+#### What is an User
 
 Imagine you have friend you often travel with. You can add his blocking events
 here. You can later get his all events and know when he is available.
-
-TODO: Ex: Allow to add `Event` when other user has free weekend
 
 #### Filter params
 
@@ -74,6 +71,7 @@ Parameters described above behaves differently when used in **create** and
 * `-c` or `--category` - exact, case
 * `-g` or `--tags` - exact, case
 * `-c` or `--desc` - substring, ignore case
+* `-b` or `--url` - substring, ignore case
 * `-u` or `--user` - described below
 
 #### User filter
@@ -98,17 +96,7 @@ Example: `pim -T "Clean room" -c "apartment"`
 
 `pim -E "Doctor appointment" -a "2017-02-05 12:00" -z "1 hour" -g "doctor" -c "appointment"`
 
-# README is update till here, coming soon
-
-### List
-
-`pim -i` shows incoming events
-
-### Add
-
-
-
-The result will be already added at `~/.ocranizer.yml`
+Result:
 
 ```
 Doctor appointment
@@ -118,24 +106,26 @@ tags: doctor
 Id: 20170124131927368
 ```
 
-If you use `pim -i` you will get summary of all incoming events sorted by time:
+Everything is stored at `~/.ocranizer.yml`
 
-```
-Doctor appointment : 2017-02-05 12:00 - 2017-02-05 13:00 [20170124131927368] appointment, doctor
-```
+### HTML output
+
+Just add `-H` and it will generate HTML calendar and open it in default browser.
+Calendar file is located at `~/.ocranizer.yml.html`.
 
 ### Help
 
-`pim -h` will tell you about params
+`pim -h` will tell you about all possible parameters.
 
 ### Human time form
 
 Please check [here](https://github.com/akwiatkowski/ocranizer/blob/master/spec/ocra_time_spec.cr)
-for details.
+for more details.
 
 You can use absolute values like:
 
 * `2017-10-10` for full day,
+* `10-10` for full day with current or next year (no past time)
 * `2017-10-10 12:40` for exact,
 * `13:40` for current day
 
@@ -144,28 +134,23 @@ or relative values like:
 * `1 week` - 1 week from now or event's time from
 * `prev 1 hour` - 1 hour before
 
-
 ## Development
 
 * [ ] TEST, TEST, TEST!!!
-* [ ] Delete action
+* [ ] Test command parser
+* [x] Delete action
 * [ ] Postpone - update but easier
-* [ ] Add own search configuration like macro, ex: `work_today` show all with `work` category and proper time ranges
-* [ ] When adding `Entity`
-* [ ] Update `id` to make it always unique for `Event` and `Todo`
-
-
-
-* [ ] Add events, todos using command line interface
-* [ ] Inteligent time parser: full, partial, words like tommorow, +1 day, +1 week
+* [ ] Add own search configuration like macro, ex: `work_today` show all with `work` category and proper time ranges, `incoming` with entities till `2 days`
+* [x] Update `id` to make it always unique for `Event` and `Todo`
+* [x] Add events, todos using command line interface
+* [x] Inteligent time parser: full, partial, words like tommorow, +1 day, +1 week
 * [ ] List of upcoming events
-* [ ] Edit existing events
-* [ ] Postpone
+* [x] Edit existing events
 * [ ] Integrare output with [remind](https://wiki.archlinux.org/index.php/Remind )
-* [ ] Render HTML output
-* [ ] CLI add
-* [ ] commad line (non-interactive): add, edit, postpone, delete
-* [ ] Saving with backup
+* [x] Render HTML output
+* [x] Saving with backup
+* [ ] Add limit filter
+
 
 ## Contributing
 

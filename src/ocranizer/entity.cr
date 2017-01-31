@@ -201,6 +201,11 @@ module Ocranizer::Entity
       return false if self.desc.downcase.index(params["desc"].downcase).nil?
     end
 
+    # desc - substring, ignore case
+    if params["url"]?
+      return false if self.url.to_s.downcase.index(params["url"].downcase).nil?
+    end
+
     # tag - exact, case
     if params["tags"]?
       return false if self.tags.index(params["tags"]).nil?

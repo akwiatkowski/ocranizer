@@ -168,23 +168,23 @@ when COMMAND_SEARCH_EVENT, COMMAND_SEARCH_TODO
   array.each do |e|
     puts e.to_s_inline
   end
-when COMMAND_INCOMING
-  c = Ocranizer::Collection.new
-  c.load
-
-  # events
-  ie = c.incoming_events
-  puts "Events (#{ie.size}/#{c.events.size}):"
-  ie.each do |e|
-    puts e.to_s_inline
-  end
-
-  # todos
-  it = c.incoming_todos
-  puts "TODOs (#{it.size}/#{c.todos.size}):"
-  it.each do |e|
-    puts e.to_s_inline
-  end
+# when COMMAND_INCOMING
+#   c = Ocranizer::Collection.new
+#   c.load
+#
+#   # events
+#   ie = c.incoming_events
+#   puts "Events (#{ie.size}/#{c.events.size}):"
+#   ie.each do |e|
+#     puts e.to_s_inline
+#   end
+#
+#   # todos
+#   it = c.incoming_todos
+#   puts "TODOs (#{it.size}/#{c.todos.size}):"
+#   it.each do |e|
+#     puts e.to_s_inline
+#   end
 when COMMAND_SHOW_DETAIL, COMMAND_UPDATE_DETAIL
   e = Ocranizer::Collection.get_event(params["id"])
   if e
