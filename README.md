@@ -136,6 +136,10 @@ or relative values like:
 
 ## Development
 
+* [ ] Not allow create entity when `time_from` > `time_to`
+* [ ] `time_to` if typed as hours uses date from `time_from`
+* [ ] Interpret fullday as 0:00 - 23:59
+* [ ] Show entity id at details
 * [ ] TEST, TEST, TEST!!!
 * [ ] Test command parser
 * [x] Delete action

@@ -19,7 +19,7 @@ class Ocranizer::CommandOptionParser
 
   COMMAND_GENERATE_HTML = 40
 
-  FORMAT_CLI = 0
+  FORMAT_CLI  = 0
   FORMAT_JSON = 1
 
   @parser : OptionParser
@@ -219,12 +219,14 @@ class Ocranizer::CommandOptionParser
       e = c.get_event(@params["id"])
       if e
         e.update_attributes(@params) if COMMAND_UPDATE_DETAIL == @command
+        c.save
         return render_detailed_entity(e)
       end
 
       e = c.get_todo(@params["id"])
       if e
         e.update_attributes(@params) if COMMAND_UPDATE_DETAIL == @command
+        c.save
         return render_detailed_entity(e)
       end
 

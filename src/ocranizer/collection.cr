@@ -6,7 +6,7 @@ require "./todo"
 
 class Ocranizer::Collection
   # path
-  DEFAULT_PATH        = "/home/#{`whoami`.to_s.strip}/.ocranizer.yml"
+  DEFAULT_PATH         = "/home/#{`whoami`.to_s.strip}/.ocranizer.yml"
   DEFAULT_BACKUP_SUFIX = ".bak"
 
   @@path = DEFAULT_PATH.as(String)
@@ -24,6 +24,7 @@ class Ocranizer::Collection
   def self.path_backup
     @@path_backup
   end
+
   # end of path
 
   YAML.mapping(

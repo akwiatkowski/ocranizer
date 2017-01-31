@@ -53,6 +53,22 @@ class Ocranizer::Todo
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url
 
+  def valid?
+    if false == time_from.nil? &&
+       false == time_to.nil? &&
+       time_from.not_nil!.time > time_to.not_nil!.time
+      # cannot be valid if time_to is less than time_from
+      return false
+    end
+
+    # check only name
+    if name.size < 3
+      return false
+    else
+      return true
+    end
+  end
+
   def <=>(other) : Int32
     if self.time_from.nil?
       if other.time_from.nil?

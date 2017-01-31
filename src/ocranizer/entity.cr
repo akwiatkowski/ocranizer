@@ -29,43 +29,45 @@ module Ocranizer::Entity
         s << "\n"
       end
 
+      s << "Name: "
       s << self.name.colorize(:yellow).to_s
       s << "\n"
 
+      s << "Time: "
       s << self.time_from.not_nil!.to_human.to_s.colorize(:green).to_s if self.time_from
       s << " -> "
       s << self.time_to.not_nil!.to_human.to_s.colorize(:green).to_s if self.time_to
       s << "\n"
 
+      s << "Place: "
       if self.place.size > 0
-        s << "at: "
         s << self.place.colorize(:yellow).to_s
-        s << "\n"
       end
+      s << "\n"
 
+      s << "Desc: "
       if self.desc.size > 0
-        s << "details: "
         s << self.desc.colorize(:yellow).to_s
-        s << "\n"
       end
+      s << "\n"
 
+      s << "URL: "
       if self.url.to_s.size > 0
-        s << "URL: "
         s << self.url.colorize(:blue).to_s
-        s << "\n"
       end
+      s << "\n"
 
+      s << "Category: "
       if self.category.size > 0
-        s << "category: "
         s << self.category.colorize(:magenta).to_s
-        s << "\n"
       end
+      s << "\n"
 
+      s << "Tags: "
       if self.tags.size > 0
-        s << "tags: "
         s << self.tags.join(", ").colorize(:cyan).to_s
-        s << "\n"
       end
+      s << "\n"
 
       s << "Id: "
       s << self.id.to_s
@@ -77,6 +79,8 @@ module Ocranizer::Entity
 
   def to_s_inline
     st = String.build do |s|
+      s << ("[" + self.id + "]").colorize(:dark_gray).to_s.ljust(28)
+
       s << self.name[0..28].colorize(:yellow).to_s.rjust(36)
       s << " : "
 
@@ -95,7 +99,6 @@ module Ocranizer::Entity
       end
 
       s << " "
-      s << ("[" + self.id + "]").colorize(:dark_gray).to_s.ljust(28)
       s << " "
       s << self.category.colorize(:cyan)
 
@@ -126,7 +129,12 @@ module Ocranizer::Entity
   end
 
   def valid?
-    if time_from.nil? || time_to.nil? || time_from.not_nil!.error? || time_to.not_nil!.error? || name.size < 3
+    if time_from.nil? ||
+       time_to.nil? ||
+       time_from.not_nil!.error? ||
+       time_to.not_nil!.error? ||
+       name.size < 3 ||
+       time_from.not_nil!.time > time_to.not_nil!.time
       return false
     else
       return true

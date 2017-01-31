@@ -4,9 +4,8 @@ class Ocranizer::HtmlGenerator
   end
 
   def initialize(
-      @collection : Ocranizer::Collection,
-      @params : Hash(String, String)
-      )
+                 @collection : Ocranizer::Collection,
+                 @params : Hash(String, String))
     @events = @collection.events(params: params).as(Array(Ocranizer::Event))
     @todos = @collection.todos(params: params).as(Array(Ocranizer::Todo))
   end
@@ -43,7 +42,7 @@ class Ocranizer::HtmlGenerator
     cell_width = 300
 
     str << "<meta charset=\"UTF-8\">"
-    str << "<title>Ocranizer</title>"
+    str << "<title>Ocranizer, generated #{Time.now.to_s("%Y-%m-%d %H:%M:%S")}</title>"
     str << "<style media=\"screen\" type=\"text/css\">"
     # http://mincss.com/
     str << "body,textarea,input,select{background:0;border-radius:0;font:16px sans-serif;margin:0}.addon,.btn-sm,.nav,textarea,input,select{outline:0;font-size:14px}.smooth{transition:all .2s}.btn,.nav a{text-decoration:none}.container{margin:0 20px;width:auto}@media(min-width:1310px){.container{margin:auto;width:1270px}}.btn,h2{font-size:2em}h1{font-size:3em}.btn{background:#999;border-radius:6px;border:0;color:#fff;cursor:pointer;display:inline-block;margin:2px 0;padding:12px 30px 14px}.btn:hover{background:#888}.btn:active,.btn:focus{background:#777}.btn-a{background:#0ae}.btn-a:hover{background:#09d}.btn-a:active,.btn-a:focus{background:#08b}.btn-b{background:#3c5}.btn-b:hover{background:#2b4}.btn-b:active,.btn-b:focus{background:#2a4}.btn-c{background:#d33}.btn-c:hover{background:#c22}.btn-c:active,.btn-c:focus{background:#b22}.btn-sm{border-radius:4px;padding:10px 14px 11px}label>*{display:inline}form>*{display:block;margin-bottom:10px}textarea,input,select{border:1px solid #ccc;padding:8px}textarea:focus,input:focus,select:focus{border-color:#5ab}textarea,input[type=text]{-webkit-appearance:none;width:13em;outline:0}.addon{box-shadow:0 0 0 1px #ccc;padding:8px 12px}"
@@ -54,7 +53,9 @@ class Ocranizer::HtmlGenerator
     str << ".calendar-day.day-5{border: 1px dotted #2a2; background-color: #fafffa}"
     str << ".calendar-day.day-6{border: 1px dotted #f55; background-color: #fdd}"
     str << ".calendar-day.day-has-entities{border-style: solid;}"
+    str << ".calendar-day.current-day{background-color: #555;color: #fff;}"
     str << ".calendar-day .entity-time{font-size: 60%}"
+    str << ".calendar-day .entity-place{font-size: 60%}"
     str << "a{color: #55a;}"
     str << "</style>"
     # TODO add https://github.com/kenwheeler/cash/
@@ -119,6 +120,14 @@ class Ocranizer::HtmlGenerator
           klass += " day-has-entities"
         end
 
+        t_now = Time.now
+        if t_now.year == cell_time.year &&
+           t_now.month == cell_time.month &&
+           t_now.day == cell_time.day &&
+           month.month == cell_time.month # only for current month
+          klass += " current-day"
+        end
+
         str << "<td class=\"calendar-day day-#{day} #{klass}\" data-time=\"#{cell_time.to_s("%Y-%m-%d")}\">"
         html_per_day(str, day: cell_time, month: month)
         str << "</td>"
@@ -177,6 +186,15 @@ class Ocranizer::HtmlGenerator
       str << "</a>"
     else
       str << "#{entity.name}"
+    end
+
+    if entity.place.to_s != ""
+      str << " "
+      str << "<span class=\"entity-place\">"
+      str << "("
+      str << entity.place
+      str << ")"
+      str << "</span> "
     end
 
     str << "</div>"
