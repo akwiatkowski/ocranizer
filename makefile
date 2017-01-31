@@ -1,5 +1,5 @@
 default:
-	shards build pim
+	shards build pim --production
 
 install:
 	sudo cp -vi bin/pim /usr/bin
