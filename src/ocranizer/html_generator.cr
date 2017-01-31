@@ -1,13 +1,18 @@
 class Ocranizer::HtmlGenerator
-  OUTPUT_PATH = Ocranizer::Collection::PATH + ".html"
+  def self.output_path
+    return Ocranizer::Collection.path + ".html"
+  end
 
-  def initialize(@collection : Ocranizer::Collection, @params : Hash(String, String))
+  def initialize(
+      @collection : Ocranizer::Collection,
+      @params : Hash(String, String)
+      )
     @events = @collection.events(params: params).as(Array(Ocranizer::Event))
     @todos = @collection.todos(params: params).as(Array(Ocranizer::Todo))
   end
 
   def make_it_so
-    f = File.new(OUTPUT_PATH, "w")
+    f = File.new(self.class.output_path, "w")
     f.puts(html)
     f.close
 
@@ -15,7 +20,7 @@ class Ocranizer::HtmlGenerator
   end
 
   def open_in_browser
-    command = "xdg-open file:#{OUTPUT_PATH}"
+    command = "xdg-open file:#{self.class.output_path}"
     # puts command
     `#{command}`
   end
@@ -147,7 +152,7 @@ class Ocranizer::HtmlGenerator
     end
   end
 
-  private def html_per_entity(str, entity : (Ocranizer::Event | Ocranizer::Todo) )
+  private def html_per_entity(str, entity : (Ocranizer::Event | Ocranizer::Todo))
     category_klass = "category-#{entity.category}"
     category_klass = "category-blank" if entity.category.to_s == ""
 

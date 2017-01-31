@@ -5,8 +5,26 @@ require "./event"
 require "./todo"
 
 class Ocranizer::Collection
-  PATH        = "/home/#{`whoami`.to_s.strip}/.ocranizer.yml"
-  PATH_BACKUP = PATH + ".bak"
+  # path
+  DEFAULT_PATH        = "/home/#{`whoami`.to_s.strip}/.ocranizer.yml"
+  DEFAULT_BACKUP_SUFIX = ".bak"
+
+  @@path = DEFAULT_PATH.as(String)
+  @@path_backup = (DEFAULT_PATH + DEFAULT_BACKUP_SUFIX).as(String)
+
+  def self.path=(p : String)
+    @@path = p
+    @@path_backup = p + DEFAULT_BACKUP_SUFIX
+  end
+
+  def self.path
+    @@path
+  end
+
+  def self.path_backup
+    @@path_backup
+  end
+  # end of path
 
   YAML.mapping(
     events: Array(Ocranizer::Event),
@@ -43,17 +61,17 @@ class Ocranizer::Collection
   end
 
   def load
-    if File.exists?(PATH)
+    if File.exists?(self.class.path)
       # load regular
-      o = Ocranizer::Collection.from_yaml(File.read(PATH))
+      o = Ocranizer::Collection.from_yaml(File.read(self.class.path))
       @events = o.events
       @todos = o.todos
 
       @events.sort!
       @todos.sort!
-    elsif File.exists?(PATH_BACKUP)
+    elsif File.exists?(self.class.path_backup)
       # try loading backup
-      o = Ocranizer::Collection.from_yaml(File.read(PATH_BACKUP))
+      o = Ocranizer::Collection.from_yaml(File.read(self.class.path_backup))
       @events = o.events
       @todos = o.todos
 
@@ -64,10 +82,10 @@ class Ocranizer::Collection
 
   def save
     # do a backup
-    FileUtils.mv(PATH, PATH_BACKUP) if File.exists?(PATH)
+    FileUtils.mv(self.class.path, self.class.path_backup) if File.exists?(self.class.path)
 
     # save to regular
-    File.open(PATH, "w") do |f|
+    File.open(self.class.path, "w") do |f|
       f.puts(self.to_yaml)
     end
   end
