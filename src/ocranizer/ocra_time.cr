@@ -96,11 +96,21 @@ struct Ocranizer::OcraTime
 
     # HH:MM, only hour
     begin
+      year = Time.now.year
+      month = Time.now.month
+      day = Time.now.day
+
+      if base_time
+        year = base_time.year
+        month = base_time.month
+        day = base_time.day
+      end
+
       parsed = Time.parse(time: s, pattern: "%H:%M", kind: Time::Kind::Local)
       parsed = Time.new(
-        year: Time.now.year,
-        month: Time.now.month,
-        day: Time.now.day,
+        year: year,
+        month: month,
+        day: day,
         hour: parsed.hour,
         minute: parsed.minute,
         kind: Time::Kind::Local
