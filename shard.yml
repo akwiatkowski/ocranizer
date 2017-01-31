@@ -8,10 +8,10 @@ targets:
   pim:
     main: src/pim.cr
 
-crystal: 0.20.4
+crystal: 0.20.5
 
 license: MIT
 
-dependencies:
-  ncurses:
-    github: jreinert/ncurses-crystal
+# dependencies:
+#   ncurses:
+#     github: jreinert/ncurses-crystal

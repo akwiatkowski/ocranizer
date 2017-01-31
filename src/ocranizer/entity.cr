@@ -131,10 +131,10 @@ module Ocranizer::Entity
       if self.duplicate?
         # valid, but duplicate
         if force
-          puts "Duplicate, but add forced"
+          # puts "Duplicate, but add forced"
           return save!
         else
-          puts "Duplicate, not saving"
+          # puts "Duplicate, not saving"
           return nil
         end
       else
