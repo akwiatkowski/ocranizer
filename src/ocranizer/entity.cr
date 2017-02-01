@@ -87,6 +87,20 @@ module Ocranizer::Entity
       s << "User: "
       s << self.user.to_s
       s << "\n"
+
+      if self.important?
+        s << "Priority: "
+        s << "IMPORTANT".colorize(:red)
+        s << "\n"
+      elsif self.urgent?
+        s << "Priority: "
+        s << "Urgent".colorize(:yellow)
+        s << "\n"
+      elsif self.low_priority?
+        s << "Priority: "
+        s << "low".colorize(:blue)
+        s << "\n"
+      end
     end
 
     return st

@@ -148,6 +148,10 @@ class Ocranizer::HtmlGenerator
       str << "</br>"
     end
 
+    str << "ID: "
+    str << entity.id
+    str << "</br>"
+
     str << "</div>"
     # end of content div
 
