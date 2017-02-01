@@ -123,7 +123,7 @@ describe Ocranizer::OcraTime do
     o.not_nil!.not_error?.should be_false
   end
 
-  it "use relative date for `HH:MM` time if available" do
+  it "use base time date for `HH:MM` time if available" do
     s = "10:20"
     t = Time.new(2018, 10, 10)
     o = Ocranizer::OcraTime.parse_human(string: s, base_time: t)

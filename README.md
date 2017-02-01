@@ -137,14 +137,15 @@ or relative values like:
 ## Development
 
 * [x] Not allow create entity when `time_from` > `time_to`
-* [ ] `time_to` if typed as hours uses date from `time_from`
+* [x] `time_to` if typed as hours uses date from `time_from`
 * [ ] Interpret fullday as 0:00 - 23:59
-* [ ] Show entity id at details
+* [x] Show entity id at details
 * [ ] TEST, TEST, TEST!!!
 * [ ] Test command parser
 * [x] Delete action
 * [ ] Postpone - update but easier
-* [ ] Add own search configuration like macro, ex: `work_today` show all with `work` category and proper time ranges, `incoming` with entities till `2 days`
+* [ ] Add search macros, ex: `work_today` show all with `work` category and proper time ranges, `incoming` with entities till `2 days`
+* [ ] Add create macros
 * [x] Update `id` to make it always unique for `Event` and `Todo`
 * [x] Add events, todos using command line interface
 * [x] Inteligent time parser: full, partial, words like tommorow, +1 day, +1 week
@@ -154,6 +155,8 @@ or relative values like:
 * [x] Render HTML output
 * [x] Saving with backup
 * [ ] Add limit filter
+* [ ] Add `priority`: low, regular, urgent, important
+* [ ] When adding full day event assume `time_to` is end of day of `time_from` if missing
 
 
 ## Contributing

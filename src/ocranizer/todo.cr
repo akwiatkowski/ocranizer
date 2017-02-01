@@ -18,7 +18,8 @@ class Ocranizer::Todo
     tags: Array(String),
     time_from: (OcraTime | Nil),
     time_to: (OcraTime | Nil),
-    url: (String | Nil)
+    url: (String | Nil),
+    priority: (Int32 | Nil)
   )
 
   JSON.mapping(
@@ -31,7 +32,8 @@ class Ocranizer::Todo
     tags: Array(String),
     time_from: (OcraTime | Nil),
     time_to: (OcraTime | Nil),
-    url: (String | Nil)
+    url: (String | Nil),
+    priority: (Int32 | Nil)
   )
 
   def initialize

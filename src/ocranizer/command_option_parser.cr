@@ -109,7 +109,7 @@ class Ocranizer::CommandOptionParser
         @params["tags"] = s
       }
 
-      parser.on("-c DESC", "--desc=DESC", "Desc") { |s|
+      parser.on("--desc=DESC", "Desc") { |s|
         @params["desc"] = s
       }
 
@@ -119,6 +119,10 @@ class Ocranizer::CommandOptionParser
 
       parser.on("-u USER", "--user=NAME", "Default user is blank. This allow you to have someone else events") { |s|
         @params["user"] = s
+      }
+
+      parser.on("-r PRIORITY", "--priority=PRIORITY", "Priority (important, urgent, low)") { |s|
+        @params["priority"] = s
       }
 
       parser.on("-F", "--force", "Force action") {

@@ -7,7 +7,17 @@ require "./collection"
 module Ocranizer::Entity
   DEFAULT_USER = ""
 
-  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url
+  PRIORITY_IMPORTANT = 100
+  PRIORITY_URGENT    =  10
+  PRIORITY_REGULAR   =   0
+  PRIORITY_LOW       = -10
+
+  PRIORITY_IMPORTANT_STRING = "important"
+  PRIORITY_URGENT_STRING    = "urgent"
+  PRIORITY_REGULAR_STRING   = nil
+  PRIORITY_LOW_STRING       = "low"
+
+  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
 
   def update_attributes(params : Hash(String, String))
     # NOTE: id cannot be changed
@@ -20,6 +30,7 @@ module Ocranizer::Entity
     self.category = params["category"] if params["category"]?
     self.tags_string = params["tags"] if params["tags"]?
     self.url = params["url"] if params["url"]?
+    self.priority_string = params["priority"] if params["priority"]?
   end
 
   def to_s_full
@@ -71,6 +82,10 @@ module Ocranizer::Entity
 
       s << "Id: "
       s << self.id.to_s
+      s << "\n"
+
+      s << "User: "
+      s << self.user.to_s
       s << "\n"
     end
 
@@ -128,6 +143,23 @@ module Ocranizer::Entity
     end
   end
 
+  def priority_string=(s : String)
+    if s == PRIORITY_IMPORTANT_STRING
+      self.priority = PRIORITY_IMPORTANT
+      return
+    end
+
+    if s == PRIORITY_URGENT_STRING
+      self.priority = PRIORITY_URGENT
+      return
+    end
+
+    if s == PRIORITY_LOW_STRING
+      self.priority = PRIORITY_LOW
+      return
+    end
+  end
+
   def valid?
     if time_from.nil? ||
        time_to.nil? ||
@@ -139,6 +171,21 @@ module Ocranizer::Entity
     else
       return true
     end
+  end
+
+  def important?
+    return false if self.priority.nil?
+    return self.priority.not_nil! >= PRIORITY_IMPORTANT
+  end
+
+  def urgent?
+    return false if self.priority.nil?
+    return self.priority.not_nil! == PRIORITY_IMPORTANT
+  end
+
+  def low_priority?
+    return false if self.priority.nil?
+    return self.priority.not_nil! < PRIORITY_REGULAR
   end
 
   def filter_hash?(params : Hash)

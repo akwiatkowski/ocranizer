@@ -19,7 +19,8 @@ class Ocranizer::Event
     tags: Array(String),
     time_from: OcraTime,
     time_to: OcraTime,
-    url: (String | Nil)
+    url: (String | Nil),
+    priority: (Int32 | Nil)
   )
 
   JSON.mapping(
@@ -32,7 +33,8 @@ class Ocranizer::Event
     tags: Array(String),
     time_from: OcraTime,
     time_to: OcraTime,
-    url: (String | Nil)
+    url: (String | Nil),
+    priority: (Int32 | Nil)
   )
 
   def initialize
@@ -50,7 +52,7 @@ class Ocranizer::Event
     @tags = Array(String).new
   end
 
-  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url
+  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
 
   def <=>(other) : Int32
     if self.time_from > other.time_from
