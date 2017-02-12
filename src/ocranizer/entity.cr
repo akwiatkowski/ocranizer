@@ -148,6 +148,17 @@ module Ocranizer::Entity
     t = nil
     t = self.time_from.not_nil!.time if self.time_from
     self.time_to = OcraTime.parse_human(string: s, base_time: t)
+
+    # special case
+    # if `time_from` is `TYPE_FULLDAY` and `time_to` is `TYPE_RELATIVE`
+    # change `time_to` to `TYPE_FULLDAY`
+    if self.time_from &&
+      self.time_to &&
+      self.time_from.not_nil!.fullday?
+      self.time_to.not_nil!.relative?
+
+      self.time_to.not_nil!.type = Ocranizer::OcraTime::TYPE_FULLDAY
+    end
   end
 
   def tags_string=(s : String)

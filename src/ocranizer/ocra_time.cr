@@ -144,16 +144,20 @@ struct Ocranizer::OcraTime
     @type == TYPE_ERROR
   end
 
-  def full_day?
+  def fullday?
     @type == TYPE_FULLDAY
+  end
+
+  def relative?
+    @type == TYPE_RELATIVE
   end
 
   def not_error?
     !error?
   end
 
-  def not_full_day?
-    !full_day?
+  def not_fullday?
+    !fullday?
   end
 
   # human type
@@ -188,12 +192,12 @@ struct Ocranizer::OcraTime
   end
 
   def at_beginning
-    return at_beginning_of_day if full_day?
+    return at_beginning_of_day if fullday?
     return @time
   end
 
   def at_end
-    return at_end_of_day if full_day?
+    return at_end_of_day if fullday?
     return @time
   end
 

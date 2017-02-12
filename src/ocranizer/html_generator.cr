@@ -289,11 +289,11 @@ class Ocranizer::HtmlGenerator
     str << "<div class=\"entity #{category_klass}\">"
 
     str << "<span class=\"entity-time\">"
-    if entity.time_from && entity.time_from.not_nil!.not_full_day?
+    if entity.time_from && entity.time_from.not_nil!.not_fullday?
       str << entity.time_from.not_nil!.time.to_s("%H:%M")
     end
 
-    if entity.time_to && entity.time_to.not_nil!.not_full_day?
+    if entity.time_to && entity.time_to.not_nil!.not_fullday?
       str << " - "
       str << entity.time_to.not_nil!.time.to_s("%H:%M")
     end
