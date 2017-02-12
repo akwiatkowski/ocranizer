@@ -21,8 +21,10 @@ class Ocranizer::Event
     time_to: OcraTime,
     url: (String | Nil),
     priority: (Int32 | Nil),
+    repeat_entity: (Bool | Nil),
+    repeat_initial: (Ocranizer::OcraTime | Nil),
     repeat_until: (Ocranizer::OcraTime | Nil),
-    repeat_interval: (Time::Span | Nil),
+    repeat_interval_string: (String | Nil),
     repeat_count: (Int32 | Nil)
   )
 
@@ -38,8 +40,10 @@ class Ocranizer::Event
     time_to: OcraTime,
     url: (String | Nil),
     priority: (Int32 | Nil),
+    repeat_entity: (Bool | Nil),
+    repeat_initial: (Ocranizer::OcraTime | Nil),
     repeat_until: (Ocranizer::OcraTime | Nil),
-    repeat_interval: (Time::Span | Nil),
+    repeat_interval_string: (String | Nil),
     repeat_count: (Int32 | Nil)
   )
 
@@ -59,6 +63,12 @@ class Ocranizer::Event
   end
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
+  # repeatition
+  property :repeat_entity # Bool | Nil - true if object qualify as repeatited
+  property :repeat_initial # OcraTime | Nil - copied `time_from`
+  property :repeat_until # OcraTime | Nil - when end repeatition
+  property :repeat_interval_string # String | Nil - how often repeat
+  property :repeat_count # Int32 | Nil - how many times repeat
 
   def <=>(other) : Int32
     if self.time_from > other.time_from

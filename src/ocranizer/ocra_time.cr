@@ -212,7 +212,7 @@ struct Ocranizer::OcraTime
   # parsing code
   def self.parse_relative(string : String)
     is_okay = false
-    t = Time::Span.new(0)
+    time_span = Time::Span.new(0)
     regexp = /(next|prev)?\s*(\d*\s*\w+)/
     result = string.scan(regexp)
 
@@ -223,17 +223,17 @@ struct Ocranizer::OcraTime
 
       if r
         if result[0][1]?.to_s.strip == "prev"
-          t += (r * (-1))
+          time_span += (r * (-1))
           is_okay = true
         else
-          t += r
+          time_span += r
           is_okay = true
         end
       end
     end
 
     if is_okay
-      return t
+      return time_span
     else
       return nil
     end
@@ -277,7 +277,7 @@ struct Ocranizer::OcraTime
     return Time.epoch(e)
   end
 
-  def self.add_relative_interval(time : Time, span : Time::Span) : Time
+  def self.add_relative_interval(time : Time, span : Time::Span, times : Int32 = 1) : Time
     next_month = time.month
     next_year = time.year
 

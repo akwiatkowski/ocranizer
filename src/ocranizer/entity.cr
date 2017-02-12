@@ -19,7 +19,11 @@ module Ocranizer::Entity
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
   # repeatition
-  property :repeat_until, :repeat_count, :repeat_interval
+  property :repeat_entity # Bool | Nil - true if object qualify as repeatited
+  property :repeat_initial # OcraTime | Nil - copied `time_from`
+  property :repeat_until # OcraTime | Nil - when end repeatition
+  property :repeat_interval # Time::Span | Nil - how often repeat
+  property :repeat_count # Int32 | Nil - how many times repeat
 
   def update_attributes(params : Hash(String, String))
     # NOTE: id cannot be changed
@@ -37,6 +41,73 @@ module Ocranizer::Entity
     self.repeat_until_string = params["repeat_until"] if params["repeat_until"]?
     self.repeat_interval_string = params["repeat_interval"] if params["repeat_interval"]?
     self.repeat_count = params["repeat_count"].to_i if params["repeat_count"]?
+    repeatition_update_attributes
+  end
+
+  private def repeatition_update_attributes
+    # both times are required for repeatition
+    if self.time_from.nil? || self.time_to.nil?
+      self.repeat_entity = false
+    end
+
+    # the only required attr to start repeated Entity
+    if self.repeat_interval
+      self.repeat_entity = true
+      # update only if not set
+      self.repeat_initial ||= self.time_from.not_nil!
+    end
+  end
+
+  def repeat_interval
+    nil
+  end
+
+  def repeatition_iterate_until_now
+    while repeatition_iterate_time_ranges
+    end
+  end
+
+  def repeatition_iterate_time_ranges
+    # check if its repeatition Entity
+    return false if false == self.repeat_entity
+
+    # check if `time_to` <= `Time.now`
+    if self.time_to.time <= Time.now
+      # try to iterate
+
+      # `repeat_count` nil means repeat infinite
+      # `repeat_count` is number, update times and decrement
+      if self.repeat_count.nil? || self.repeat_count.not_nil! > 0
+        # self.time_from.time = OcraTime.add_relative_interval(
+        #   time: self.time_from.time,
+        #   span: self.repeat_interval.not_nil!
+        # )
+        # self.time_to.time = OcraTime.add_relative_interval(
+        #   time: self.time_to.time,
+        #   span: self.repeat_interval.not_nil!
+        # )
+        self.repeat_count = self.repeat_count.not_nil! - 1
+
+        return true
+      end
+    end
+
+    return false
+  end
+
+  # return true only if proper repeatitions attrs can lead to calculate
+  # next Entity
+  # NOTE: if `repeat_count` is `nil` can create infinite loop
+  # so always iterate until some time, example: max `time_to` + 1 year
+  def has_repeats?
+  end
+
+  # return next Entity or nil
+  def next_entity
+    return nil if false == has_repeats?
+
+    # TODO copy Entity attrs, modify `time_from` and `time_to`
+    # decrement `repeat_count`
   end
 
   def to_s_full
@@ -159,8 +230,8 @@ module Ocranizer::Entity
     # if `time_from` is `TYPE_FULLDAY` and `time_to` is `TYPE_RELATIVE`
     # change `time_to` to `TYPE_FULLDAY`
     if self.time_from &&
-      self.time_to &&
-      self.time_from.not_nil!.fullday?
+       self.time_to &&
+       self.time_from.not_nil!.fullday?
       self.time_to.not_nil!.relative?
 
       self.time_to.not_nil!.type = Ocranizer::OcraTime::TYPE_FULLDAY
@@ -169,10 +240,6 @@ module Ocranizer::Entity
 
   def repeat_until_string=(s : String)
     self.repeat_until = OcraTime.parse_human(string: s)
-  end
-
-  def repeat_interval_string=(s : String)
-    self.repeat_interval = OcraTime.parse_relative(string: s)
   end
 
   def tags_string=(s : String)
@@ -374,7 +441,7 @@ module Ocranizer::Entity
   end
 
   def is_within?(day : Time) : Bool
-    # TODO: add Todo with one time
+    # TODO: add Todo when `time_from` is nil and `time_to` is set as a deadline
     return false if self.time_to.nil? || self.time_from.nil?
 
     t = day.at_beginning_of_day
