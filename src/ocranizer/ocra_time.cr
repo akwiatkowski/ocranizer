@@ -56,7 +56,7 @@ struct Ocranizer::OcraTime
   def self.parse_human(string : String, base_time : (Time | Nil) = nil)
     s = string.strip
 
-    # parse human-like relative
+    # parse human-like
     relative = parse_relative(s)
 
     # YYYY-mm-dd HH:MM
@@ -210,11 +210,11 @@ struct Ocranizer::OcraTime
   end
 
   # parsing code
-  def self.parse_relative(s : String)
+  def self.parse_relative(string : String)
     is_okay = false
     t = Time::Span.new(0)
     regexp = /(next|prev)?\s*(\d*\s*\w+)/
-    result = s.scan(regexp)
+    result = string.scan(regexp)
 
     # protip: better use scan, becuase if there is nil at $1
     # you wil have problem to debug it

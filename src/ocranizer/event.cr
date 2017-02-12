@@ -20,7 +20,10 @@ class Ocranizer::Event
     time_from: OcraTime,
     time_to: OcraTime,
     url: (String | Nil),
-    priority: (Int32 | Nil)
+    priority: (Int32 | Nil),
+    repeat_until: (Ocranizer::OcraTime | Nil),
+    repeat_interval: (Time::Span | Nil),
+    repeat_count: (Int32 | Nil)
   )
 
   JSON.mapping(
@@ -34,7 +37,10 @@ class Ocranizer::Event
     time_from: OcraTime,
     time_to: OcraTime,
     url: (String | Nil),
-    priority: (Int32 | Nil)
+    priority: (Int32 | Nil),
+    repeat_until: (Ocranizer::OcraTime | Nil),
+    repeat_interval: (Time::Span | Nil),
+    repeat_count: (Int32 | Nil)
   )
 
   def initialize

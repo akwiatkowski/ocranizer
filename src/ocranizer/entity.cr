@@ -18,6 +18,8 @@ module Ocranizer::Entity
   PRIORITY_LOW_STRING       = "low"
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
+  # repeatition
+  property :repeat_until, :repeat_count, :repeat_interval
 
   def update_attributes(params : Hash(String, String))
     # NOTE: id cannot be changed
@@ -31,6 +33,10 @@ module Ocranizer::Entity
     self.tags_string = params["tags"] if params["tags"]?
     self.url = params["url"] if params["url"]?
     self.priority_string = params["priority"] if params["priority"]?
+    # repeatitions
+    self.repeat_until_string = params["repeat_until"] if params["repeat_until"]?
+    self.repeat_interval_string = params["repeat_interval"] if params["repeat_interval"]?
+    self.repeat_count = params["repeat_count"].to_i if params["repeat_count"]?
   end
 
   def to_s_full
@@ -159,6 +165,14 @@ module Ocranizer::Entity
 
       self.time_to.not_nil!.type = Ocranizer::OcraTime::TYPE_FULLDAY
     end
+  end
+
+  def repeat_until_string=(s : String)
+    self.repeat_until = OcraTime.parse_human(string: s)
+  end
+
+  def repeat_interval_string=(s : String)
+    self.repeat_interval = OcraTime.parse_relative(string: s)
   end
 
   def tags_string=(s : String)
