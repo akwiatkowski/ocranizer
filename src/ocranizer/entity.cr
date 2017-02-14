@@ -27,7 +27,7 @@ module Ocranizer::Entity
 
 
   def after_load
-    repeatition_iterate_until_now
+    repeatition_iterate_until_current_month
   end
 
   def update_attributes(params : Hash(String, String))
@@ -47,6 +47,8 @@ module Ocranizer::Entity
     case params["repeat"]?
     when "monthly"
       params["repeat_interval"] = "1 month"
+    when "yearly"
+      params["repeat_interval"] = "1 year"
     end
     # direct params
     self.repeat_until_string = params["repeat_until"] if params["repeat_until"]?
@@ -89,6 +91,15 @@ module Ocranizer::Entity
     return false unless self.is_repeated?
 
     while self.max_time <= Ocranizer::OcraTime.now
+      repeatition_iterate_time_ranges
+    end
+  end
+
+  def repeatition_iterate_until_current_month
+    # check if its repeatition Entity
+    return false unless self.is_repeated?
+
+    while self.max_time <= Ocranizer::OcraTime.now.at_beginning_of_month
       repeatition_iterate_time_ranges
     end
   end

@@ -103,4 +103,19 @@ describe Ocranizer::Event do
     nes = e.next_entities_until(time)
     nes.size.should eq(6)
   end
+
+  it "test real life example" do
+    e = Ocranizer::Event.new
+    e.update_attributes({
+      "time_from" => "1960-10-10",
+      "time_to"   => "1960-10-10",
+      "name"      => "Birthday",
+      "repeat"    => "yearly",
+    })
+
+    time = Time.new(2017, 10, 1)
+
+    nes = e.next_entities_until(time)
+    nes.size.should eq(56)
+  end
 end

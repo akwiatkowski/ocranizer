@@ -128,6 +128,9 @@ class Ocranizer::CommandOptionParser
       parser.on("--monthly", "Repeat entity monthly") {
         @params["repeat"] = "monthly"
       }
+      parser.on("--yearly", "Repeat entity yearly") {
+        @params["repeat"] = "yearly"
+      }
 
       parser.on("-F", "--force", "Force action") {
         @params["force"] = "true"
