@@ -1,5 +1,7 @@
 require "yaml"
 
+require "./ocra_time_span"
+
 struct Ocranizer::OcraTime
   TYPE_ERROR    = -1
   TYPE_RELATIVE =  0

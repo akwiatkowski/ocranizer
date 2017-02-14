@@ -19,11 +19,12 @@ module Ocranizer::Entity
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
   # repeatition
-  property :repeat_entity # Bool | Nil - true if object qualify as repeatited
-  property :repeat_initial # OcraTime | Nil - copied `time_from`
-  property :repeat_until # OcraTime | Nil - when end repeatition
+  property :repeat_entity   # Bool | Nil - true if object qualify as repeatited
+  property :repeat_initial  # OcraTime | Nil - copied `time_from`
+  property :repeat_until    # OcraTime | Nil - when end repeatition
   property :repeat_interval # Time::Span | Nil - how often repeat
-  property :repeat_count # Int32 | Nil - how many times repeat
+  property :repeat_count    # Int32 | Nil - how many times repeat
+
 
   def update_attributes(params : Hash(String, String))
     # NOTE: id cannot be changed
@@ -50,16 +51,12 @@ module Ocranizer::Entity
       self.repeat_entity = false
     end
 
-    # the only required attr to start repeated Entity
-    if self.repeat_interval
+    # the only required attr to start repeated Entity is `repeat_interval_string`
+    if self.repeat_interval_string
       self.repeat_entity = true
       # update only if not set
       self.repeat_initial ||= self.time_from.not_nil!
     end
-  end
-
-  def repeat_interval
-    nil
   end
 
   def repeatition_iterate_until_now
@@ -78,14 +75,10 @@ module Ocranizer::Entity
       # `repeat_count` nil means repeat infinite
       # `repeat_count` is number, update times and decrement
       if self.repeat_count.nil? || self.repeat_count.not_nil! > 0
-        # self.time_from.time = OcraTime.add_relative_interval(
-        #   time: self.time_from.time,
-        #   span: self.repeat_interval.not_nil!
-        # )
-        # self.time_to.time = OcraTime.add_relative_interval(
-        #   time: self.time_to.time,
-        #   span: self.repeat_interval.not_nil!
-        # )
+        span = Ocranizer::OcraTimeSpan.new(string: repeat_interval_string)
+
+        self.time_from.time = span + self.time_from.time
+        self.time_to.time = span + self.time_to.time
         self.repeat_count = self.repeat_count.not_nil! - 1
 
         return true

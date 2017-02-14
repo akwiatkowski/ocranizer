@@ -63,11 +63,12 @@ class Ocranizer::Todo
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url
   # repeatition
-  property :repeat_entity # Bool | Nil - true if object qualify as repeatited
-  property :repeat_initial # OcraTime | Nil - copied `time_from`
-  property :repeat_until # OcraTime | Nil - when end repeatition
+  property :repeat_entity          # Bool | Nil - true if object qualify as repeatited
+  property :repeat_initial         # OcraTime | Nil - copied `time_from`
+  property :repeat_until           # OcraTime | Nil - when end repeatition
   property :repeat_interval_string # String | Nil - how often repeat
-  property :repeat_count # Int32 | Nil - how many times repeat
+  property :repeat_count           # Int32 | Nil - how many times repeat
+
 
   def valid?
     if false == time_from.nil? &&
