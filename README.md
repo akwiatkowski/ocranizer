@@ -92,6 +92,11 @@ You can specify more information (except the `id` which is generated automatical
 
 Example: `pim -T "Clean room" -c "apartment"`
 
+#### Repeated
+
+By adding `--monthly` or `--yearly` you can create repeated entities. This is a new
+feature and interface is not fully ready yet.
+
 ### Add `Event`
 
 `pim -E "Doctor appointment" -a "2017-02-05 12:00" -z "1 hour" -g "doctor" -c "appointment"`
@@ -157,7 +162,8 @@ or relative values like:
 * [ ] Add limit filter
 * [ ] Add `priority`: low, regular, urgent, important
 * [ ] When adding full day event assume `time_to` is end of day of `time_from` if missing
-
+* [x] Repeated entities
+* [ ] Auto send calendars HTML via email
 
 ## Contributing
 
