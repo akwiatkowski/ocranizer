@@ -8,6 +8,26 @@ class Ocranizer::HtmlGenerator
                  @params : Hash(String, String))
     @events = @collection.events(params: params).as(Array(Ocranizer::Event))
     @todos = @collection.todos(params: params).as(Array(Ocranizer::Todo))
+
+    @time_from = Ocranizer::OcraTime.now.at_beginning_of_month.as(Time)
+    @time_to = calendar_time_to.as(Time)
+
+    # repeated entities
+    repeated_entities = Array(Ocranizer::Entity).new
+
+    @events.each do |event|
+      repeated_entities += event.next_entities_until(time: @time_to)
+    end
+    @todos.each do |todo|
+      repeated_entities += todo.next_entities_until(time: @time_to)
+    end
+    repeated_entities.each do |e|
+      if e.as?(Ocranizer::Todo)
+        @todos << e.as(Ocranizer::Todo)
+      elsif e.as?(Ocranizer::Event)
+        @events << e.as(Ocranizer::Event)
+      end
+    end
   end
 
   def make_it_so
@@ -42,7 +62,7 @@ class Ocranizer::HtmlGenerator
     cell_width = 300
 
     str << "<meta charset=\"UTF-8\">"
-    str << "<title>Ocranizer, generated #{Time.now.to_s("%Y-%m-%d %H:%M:%S")}</title>"
+    str << "<title>Ocranizer, generated #{Ocranizer::OcraTime.now.to_s("%Y-%m-%d %H:%M:%S")}</title>"
     str << "<style media=\"screen\" type=\"text/css\">"
     # http://mincss.com/
     str << "body,textarea,input,select{background:0;border-radius:0;font:16px sans-serif;margin:0}.addon,.btn-sm,.nav,textarea,input,select{outline:0;font-size:14px}.smooth{transition:all .2s}.btn,.nav a{text-decoration:none}.container{margin:0 20px;width:auto}@media(min-width:1310px){.container{margin:auto;width:1270px}}.btn,h2{font-size:2em}h1{font-size:3em}.btn{background:#999;border-radius:6px;border:0;color:#fff;cursor:pointer;display:inline-block;margin:2px 0;padding:12px 30px 14px}.btn:hover{background:#888}.btn:active,.btn:focus{background:#777}.btn-a{background:#0ae}.btn-a:hover{background:#09d}.btn-a:active,.btn-a:focus{background:#08b}.btn-b{background:#3c5}.btn-b:hover{background:#2b4}.btn-b:active,.btn-b:focus{background:#2a4}.btn-c{background:#d33}.btn-c:hover{background:#c22}.btn-c:active,.btn-c:focus{background:#b22}.btn-sm{border-radius:4px;padding:10px 14px 11px}label>*{display:inline}form>*{display:block;margin-bottom:10px}textarea,input,select{border:1px solid #ccc;padding:8px}textarea:focus,input:focus,select:focus{border-color:#5ab}textarea,input[type=text]{-webkit-appearance:none;width:13em;outline:0}.addon{box-shadow:0 0 0 1px #ccc;padding:8px 12px} "
@@ -56,6 +76,7 @@ class Ocranizer::HtmlGenerator
     str << ".calendar-day.day-6{border: 1px dotted #f55; background-color: #fdd} "
     str << ".calendar-day.day-has-entities{border-style: solid;} "
     str << ".calendar-day.current-day{background-color: #555;color: #fff;} "
+    str << ".calendar-day.current-day a{color: #fff;} "
     str << ".calendar-day .entity-time{font-size: 60%} "
     str << ".calendar-day .entity-place{font-size: 60%} "
 
@@ -179,20 +200,22 @@ class Ocranizer::HtmlGenerator
     end
   end
 
-  private def html_calendar(str)
-    t_from = Time.now.at_beginning_of_month
+  private def calendar_time_to
     t_tos = Array(Time).new
-    t_tos << Time.now.at_end_of_month
+    t_tos << Ocranizer::OcraTime.now.at_end_of_month
 
     t_tos += @events.map(&.time_to).map(&.time)
     t_tos += @todos.map(&.time_to).select { |t| t }.map { |t| t.not_nil!.time }
     t_to = t_tos.max.as(Time)
     t_to = t_to.at_end_of_month
+    return t_to
+  end
 
-    str << "<h2>#{t_from.to_s("%Y-%m-%d")} - #{t_to.to_s("%Y-%m-%d")}</h2>"
+  private def html_calendar(str)
+    str << "<h2>#{@time_from.to_s("%Y-%m-%d")} - #{@time_to.to_s("%Y-%m-%d")}</h2>"
 
-    t = t_from
-    while t < t_to
+    t = @time_from
+    while t < @time_to
       html_per_month(str, month: t)
 
       t = t.at_end_of_month + Time::Span.new(1, 0, 0)
@@ -233,7 +256,7 @@ class Ocranizer::HtmlGenerator
           klass += " day-has-entities"
         end
 
-        t_now = Time.now
+        t_now = Ocranizer::OcraTime.now
         if t_now.year == cell_time.year &&
            t_now.month == cell_time.month &&
            t_now.day == cell_time.day &&

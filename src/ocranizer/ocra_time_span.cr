@@ -8,16 +8,23 @@ struct Time
 end
 
 struct Ocranizer::OcraTimeSpan
-  REGEXP = /(next|prev)?\s*(\d*)\s*(\w+)/
+  REGEXP      = /(next|prev)?\s*(\d*)\s*(\w+)/
+  VALID_UNITS = [
+    "now",
+    "hour", "hours",
+    "day", "days",
+    "week", "weeks",
+    "month", "months",
+    "year", "years",
+  ]
 
   ZERO_SPAN    = Time::Span.new(0)
   TEN_MIN_SPAN = Time::Span.new(0, 10, 0)
   HOUR_SPAN    = Time::Span.new(1, 0, 0)
   DAY_SPAN     = HOUR_SPAN * 24
   WEEK_SPAN    = DAY_SPAN * 7
-  # above will require some hacks
-  MONTH_SPAN = DAY_SPAN * 30
-  YEAR_SPAN  = DAY_SPAN * 365
+  MONTH_SPAN   = DAY_SPAN * 30
+  YEAR_SPAN    = DAY_SPAN * 365
 
   def initialize(@string : String)
     @chunks = Array(NamedTuple(prefix: String, quantity: Int32, unit: String)).new
@@ -39,12 +46,19 @@ struct Ocranizer::OcraTimeSpan
 
     result = @string.scan(REGEXP)
     result.each do |r|
-      @chunks << {
-        prefix:   r[1].to_s.downcase,
-        quantity: r[2].to_s != "" ? r[2].to_s.to_i : 1,
-        unit:     r[3].to_s.downcase,
-      }
+      unit = r[3]?.to_s.downcase
+      if VALID_UNITS.includes?(unit)
+        @chunks << {
+          prefix:   r[1]?.to_s.downcase,
+          quantity: r[2]?.to_s != "" ? r[2].to_s.to_i : 1,
+          unit:     unit,
+        }
+      end
     end
+  end
+
+  def error?
+    return @chunks.size == 0
   end
 
   def +(time : Time) : Time
@@ -89,16 +103,20 @@ struct Ocranizer::OcraTimeSpan
     end
   end
 
-  def modify_years(time : Time, quantity : Int32)
-    return Time.new(
-      time.year + quantity,
-      time.month,
-      time.day,
-      time.hour,
-      time.minute
-    )
+  def modify_years(time : Time, quantity : Int32) : Time
+    self.class.modify_years(time: time, quantity: quantity)
   end
 
+  def self.modify_years(time : Time, quantity : Int32) : Time
+    return Time.new(
+      year: time.year + quantity,
+      month: time.month,
+      day: time.day,
+      hour: time.hour,
+      minute: time.minute,
+      kind: Time::Kind::Local
+    )
+  end
 
   def modify_months(time : Time, quantity : Int32)
     new_year = time.year
@@ -120,11 +138,12 @@ struct Ocranizer::OcraTimeSpan
     end
 
     return Time.new(
-      new_year,
-      new_month,
-      time.day,
-      time.hour,
-      time.minute
+      year: new_year,
+      month: new_month,
+      day: time.day,
+      hour: time.hour,
+      minute: time.minute,
+      kind: Time::Kind::Local
     )
   end
 
@@ -136,12 +155,12 @@ struct Ocranizer::OcraTimeSpan
     new_time = time + (DAY_SPAN * quantity)
 
     return Time.new(
-      new_time.year,
-      new_time.month,
-      new_time.day,
-      time.hour,
-      time.minute
+      year: new_time.year,
+      month: new_time.month,
+      day: new_time.day,
+      hour: time.hour,
+      minute: time.minute,
+      kind: Time::Kind::Local
     )
   end
-
 end
