@@ -40,23 +40,25 @@ describe Ocranizer::OcraTime do
   end
 
   it "parse 'next day' string" do
+    now = Ocranizer::OcraTime.now
     o = Ocranizer::OcraTime.parse_human("next day")
     o.should be_truthy
 
     t = o.not_nil!.time
 
-    (Time.now - t < Time::Span.new(-24, 0, 0)).should be_true
-    (Time.now - t > Time::Span.new(-24, -11, 0)).should be_true
+    (now - t < Time::Span.new(-24, 0, 0)).should be_true
+    (now - t > Time::Span.new(-24, -11, 0)).should be_true
   end
 
   it "parse 'day' string (next is by default)" do
+    now = Ocranizer::OcraTime.now
     o = Ocranizer::OcraTime.parse_human("day")
     o.should be_truthy
 
     t = o.not_nil!.time
 
-    (Time.now - t < Time::Span.new(-24, 0, 0)).should be_true
-    (Time.now - t > Time::Span.new(-24, -11, 0)).should be_true
+    (now - t < Time::Span.new(-24, 0, 0)).should be_true
+    (now - t > Time::Span.new(-24, -11, 0)).should be_true
   end
 
   it "parse 'next 2 days'" do
@@ -87,26 +89,6 @@ describe Ocranizer::OcraTime do
 
     (Time.now - t < Time::Span.new(-1, 0, 0)).should be_true
     (Time.now - t > Time::Span.new(-1, -11, 0)).should be_true
-  end
-
-  it "add 1 month to January 30" do
-    time = Time.new(2010, 1, 30)
-    span = Ocranizer::OcraTime::MONTH_SPAN
-
-    result = Ocranizer::OcraTime.add_relative_interval(time, span)
-
-    ((result - time) >= Ocranizer::OcraTime::MONTH_SPAN).should be_true
-  end
-
-  it "conserve day when adding month multiple times" do
-    day = 10
-    time = Time.new(2010, 3, day)
-    span = Ocranizer::OcraTime::MONTH_SPAN
-
-    100.times do
-      time = Ocranizer::OcraTime.add_relative_interval(time, span)
-      time.day.should eq(day)
-    end
   end
 
   it "parse wrong string" do

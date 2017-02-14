@@ -58,20 +58,22 @@ struct Ocranizer::OcraTime
   def self.parse_human(string : String, base_time : (Time | Nil) = nil)
     s = string.strip
 
-    # parse human-like
-    relative = parse_relative(s)
+    # parse like `next year` human strings
+    relative_span = Ocranizer::OcraTimeSpan.new(string: s)
 
     # YYYY-mm-dd HH:MM
     begin
       parsed = Time.parse(time: s, pattern: "%Y-%m-%d %H:%M", kind: Time::Kind::Local)
-      return new(base_time: parsed, relative: relative, type: TYPE_EXACT)
+      parsed += relative_span
+      return new(time: parsed, type: TYPE_EXACT)
     rescue Time::Format::Error
     end
 
     # YYYY-mm-dd, only day
     begin
       parsed = Time.parse(time: s, pattern: "%Y-%m-%d", kind: Time::Kind::Local)
-      return new(base_time: parsed, relative: relative, type: TYPE_FULLDAY)
+      parsed += relative_span
+      return new(time: parsed, type: TYPE_FULLDAY)
     rescue Time::Format::Error
     end
 
@@ -89,10 +91,9 @@ struct Ocranizer::OcraTime
       )
       if parsed < Time.now
         # add 1 year because time cannot be in past
-        parsed = add_relative_interval(time: parsed, span: YEAR_SPAN)
+        parsed = Ocranizer::OcraTimeSpan.modify_years(time: parsed, quantity: 1)
       end
-
-      return new(base_time: parsed, relative: relative, type: TYPE_FULLDAY)
+      return new(time: parsed, type: TYPE_FULLDAY)
     rescue Time::Format::Error
     end
 
@@ -117,25 +118,17 @@ struct Ocranizer::OcraTime
         minute: parsed.minute,
         kind: Time::Kind::Local
       )
-
-      return new(base_time: parsed, relative: relative, type: TYPE_HOUR)
+      parsed += relative_span
+      return new(time: parsed, type: TYPE_HOUR)
     rescue Time::Format::Error
     end
 
-    return new(base_time: base_time, relative: relative, type: TYPE_RELATIVE)
-  end
-
-  def self.new(base_time : (Time | Nil), relative : (Time::Span | Nil), type : Int32)
-    if base_time.nil? && relative.nil?
+    if relative_span.error?
       return new_error
     else
-      t = base_time
-      t = now_normalized if t.nil?
-
-      r = relative
-      r = ZERO_SPAN if r.nil?
-
-      return new(time: add_relative_interval(t, r), type: type)
+      base_time = now_normalized if base_time.nil?
+      base_time += relative_span
+      return new(time: base_time, type: TYPE_RELATIVE)
     end
   end
 
@@ -211,126 +204,14 @@ struct Ocranizer::OcraTime
     return self.time < other.time
   end
 
-  # parsing code
-  def self.parse_relative(string : String)
-    is_okay = false
-    time_span = Time::Span.new(0)
-    regexp = /(next|prev)?\s*(\d*\s*\w+)/
-    result = string.scan(regexp)
-
-    # protip: better use scan, becuase if there is nil at $1
-    # you wil have problem to debug it
-    if result.size > 0
-      r = parse_relative_span(result[0][2])
-
-      if r
-        if result[0][1]?.to_s.strip == "prev"
-          time_span += (r * (-1))
-          is_okay = true
-        else
-          time_span += r
-          is_okay = true
-        end
-      end
-    end
-
-    if is_okay
-      return time_span
-    else
-      return nil
-    end
-  end
-
-  def self.parse_relative_span(s : String) : (Time::Span | Nil)
-    if s =~ /(\d*)\s*(\w+)/
-      case $2
-      when "now"
-        return ZERO_SPAN
-      when "hour"
-        return HOUR_SPAN
-      when "hours"
-        return HOUR_SPAN * $1.to_s.to_i
-      when "day"
-        return DAY_SPAN
-      when "days"
-        return DAY_SPAN * $1.to_s.to_i
-      when "week"
-        return WEEK_SPAN
-      when "weeks"
-        return WEEK_SPAN * $1.to_s.to_i
-      when "month"
-        return MONTH_SPAN
-      when "months"
-        return MONTH_SPAN * $1.to_s.to_i
-      when "year"
-        return YEAR_SPAN
-      when "years"
-        return YEAR_SPAN * $1.to_s.to_i
-      end
-    end
-
-    return nil
+  def self.now
+    return Time.now.to_local
   end
 
   def self.now_normalized
-    e = Time.now.epoch
+    e = Time.now.to_local.epoch
     e -= e % TEN_MIN_SPAN.total_seconds.to_i64
     e += TEN_MIN_SPAN.total_seconds.to_i64
-    return Time.epoch(e)
-  end
-
-  def self.add_relative_interval(time : Time, span : Time::Span, times : Int32 = 1) : Time
-    next_month = time.month
-    next_year = time.year
-
-    if span == MONTH_SPAN
-      # it's tricky!
-      # what if someone wants add month to January 30?
-      next_month = time.month + 1
-      if next_month > 12
-        next_month = 1
-        next_year = time.year + 1
-      else
-        next_year = time.year
-      end
-
-      begin
-        result_time = Time.new(
-          next_year,
-          next_month,
-          time.day,
-          time.hour,
-          time.minute
-        )
-        return result_time
-      rescue e
-        if e.message == "invalid time"
-          return time + span
-        else
-          raise e
-        end
-      end
-    end
-
-    if span == YEAR_SPAN
-      begin
-        result_time = Time.new(
-          time.year + 1,
-          time.month,
-          time.day,
-          time.hour,
-          time.minute
-        )
-        return result_time
-      rescue e
-        if e.message == "invalid time"
-          return time + span
-        else
-          raise e
-        end
-      end
-    end
-
-    return time + span
+    return Time.epoch(e).to_local
   end
 end

@@ -48,7 +48,7 @@ class Ocranizer::Event
   )
 
   def initialize
-    @id = Time.now.to_s("%Y%m%d%H%M%S%L")
+    @id = Time.now.to_local.to_s("%Y%m%d%H%M%S%L")
     @user = String.new
 
     @time_from = OcraTime.new_time_from

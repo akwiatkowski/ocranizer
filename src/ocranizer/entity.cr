@@ -26,6 +26,10 @@ module Ocranizer::Entity
   property :repeat_count    # Int32 | Nil - how many times repeat
 
 
+  def after_load
+    repeatition_iterate_until_now
+  end
+
   def update_attributes(params : Hash(String, String))
     # NOTE: id cannot be changed
     self.user = params["user"] if params["user"]?
@@ -39,68 +43,145 @@ module Ocranizer::Entity
     self.url = params["url"] if params["url"]?
     self.priority_string = params["priority"] if params["priority"]?
     # repeatitions
+    # macros
+    case params["repeat"]?
+    when "monthly"
+      params["repeat_interval"] = "1 month"
+    end
+    # direct params
     self.repeat_until_string = params["repeat_until"] if params["repeat_until"]?
     self.repeat_interval_string = params["repeat_interval"] if params["repeat_interval"]?
     self.repeat_count = params["repeat_count"].to_i if params["repeat_count"]?
     repeatition_update_attributes
   end
 
+  def is_repeated?
+    if (self.time_from || self.time_to) && self.repeat_interval_string
+      return true
+    else
+      return false
+    end
+  end
+
   private def repeatition_update_attributes
     # both times are required for repeatition
-    if self.time_from.nil? || self.time_to.nil?
+    if self.time_from.nil? && self.time_to.nil?
       self.repeat_entity = false
     end
 
     # the only required attr to start repeated Entity is `repeat_interval_string`
     if self.repeat_interval_string
       self.repeat_entity = true
+
       # update only if not set
-      self.repeat_initial ||= self.time_from.not_nil!
+      if self.time_from
+        self.repeat_initial ||= self.time_from.not_nil!
+      elsif self.time_to
+        self.repeat_initial ||= self.time_to.not_nil!
+      else
+        # should not occur
+      end
     end
   end
 
   def repeatition_iterate_until_now
-    while repeatition_iterate_time_ranges
+    # check if its repeatition Entity
+    return false unless self.is_repeated?
+
+    while self.max_time <= Ocranizer::OcraTime.now
+      repeatition_iterate_time_ranges
     end
   end
 
   def repeatition_iterate_time_ranges
     # check if its repeatition Entity
-    return false if false == self.repeat_entity
+    return false unless self.is_repeated?
 
-    # check if `time_to` <= `Time.now`
-    if self.time_to.time <= Time.now
-      # try to iterate
+    # `repeat_count` nil means repeat infinite
+    # `repeat_count` is number, update times and decrement
+    if self.repeat_count.nil? || self.repeat_count.not_nil! > 0
+      span = Ocranizer::OcraTimeSpan.new(string: repeat_interval_string.not_nil!)
 
-      # `repeat_count` nil means repeat infinite
-      # `repeat_count` is number, update times and decrement
-      if self.repeat_count.nil? || self.repeat_count.not_nil! > 0
-        span = Ocranizer::OcraTimeSpan.new(string: repeat_interval_string)
-
-        self.time_from.time = span + self.time_from.time
-        self.time_to.time = span + self.time_to.time
-        self.repeat_count = self.repeat_count.not_nil! - 1
-
-        return true
+      if self.time_from
+        self.time_from.not_nil!.time = span + self.time_from.not_nil!.time
       end
+      if self.time_to
+        self.time_to.not_nil!.time = span + self.time_to.not_nil!.time
+      end
+      if self.repeat_count
+        # decrement limited repeatitions
+        self.repeat_count = self.repeat_count.not_nil! - 1
+      end
+
+      return true
     end
 
     return false
   end
 
-  # return true only if proper repeatitions attrs can lead to calculate
-  # next Entity
-  # NOTE: if `repeat_count` is `nil` can create infinite loop
-  # so always iterate until some time, example: max `time_to` + 1 year
-  def has_repeats?
+  # return next Entity or nil for
+  def next_entity : (Entity | Nil)
+    return nil if false == self.is_repeated?
+
+    # clone without id
+    new_entity = self.clone
+
+    # decrement repeat count
+    result = new_entity.repeatition_iterate_time_ranges
+
+    # create fake ID
+    new_entity.id = new_entity.max_time.to_local.to_s("%Y%m%d%H%M%S%L") + "_" + rand(10_000).to_s
+
+    if result
+      # could be created (ex: count > 0)
+      return new_entity
+    else
+      return nil
+    end
   end
 
-  # return next Entity or nil
-  def next_entity
-    return nil if false == has_repeats?
+  def next_entities_until(time : Time)
+    a = Array(Entity).new
+    e = self
+    in_loop = true
 
-    # TODO copy Entity attrs, modify `time_from` and `time_to`
-    # decrement `repeat_count`
+    while in_loop
+      ne = e.next_entity
+      if ne && ne.not_nil!.max_time <= time
+        a << ne
+        e = ne
+      else
+        in_loop = false
+      end
+    end
+
+    return a
+  end
+
+  def max_time : Time
+    [self.time_from, self.time_to].select { |t| t }.map { |t| t.not_nil!.time }.max
+  end
+
+  def clone
+    new_entity = self.class.new
+
+    new_entity.category = self.category
+    new_entity.desc = self.desc
+    new_entity.name = self.name
+    new_entity.place = self.place
+    new_entity.priority = self.priority
+    new_entity.repeat_count = self.repeat_count
+    new_entity.repeat_entity = self.repeat_entity
+    new_entity.repeat_initial = self.repeat_initial
+    new_entity.repeat_interval_string = self.repeat_interval_string
+    new_entity.repeat_until = self.repeat_until
+    new_entity.tags = self.tags
+    new_entity.time_from = self.time_from
+    new_entity.time_to = self.time_to
+    new_entity.url = self.url
+    new_entity.user = self.user
+
+    return new_entity
   end
 
   def to_s_full
@@ -434,10 +515,16 @@ module Ocranizer::Entity
   end
 
   def is_within?(day : Time) : Bool
-    # TODO: add Todo when `time_from` is nil and `time_to` is set as a deadline
+    t = day.at_beginning_of_day
+
+    # when `time_from` is nil and `time_to` is set as a deadline
+    if self.time_to && self.time_from.nil?
+      tt = self.time_to.not_nil!.time.at_end_of_day
+      return true if tt.at_beginning_of_day == t.at_beginning_of_day
+    end
+
     return false if self.time_to.nil? || self.time_from.nil?
 
-    t = day.at_beginning_of_day
     tf = self.time_from.not_nil!.time.at_beginning_of_day
     tt = self.time_to.not_nil!.time.at_end_of_day
 

@@ -98,6 +98,14 @@ class Ocranizer::Collection
       @events.sort!
       @todos.sort!
     end
+
+    # after load for repeated
+    @events.each do |e|
+      e.after_load
+    end
+    @todos.each do |e|
+      e.after_load
+    end
   end
 
   def save
@@ -131,12 +139,12 @@ class Ocranizer::Collection
   end
 
   def incoming_events(max : Int32 = 20)
-    tf = Time.now.at_beginning_of_day
+    tf = Ocranizer::OcraTime.now.at_beginning_of_day
     return @events.select { |e| e.time_from.at_beginning_of_day >= tf }.sort { |a, b| a.time_from.time <=> b.time_from.time }[0...max]
   end
 
   def incoming_todos(max : Int32 = 20)
-    tf = Time.now.at_end_of_day
+    tf = Ocranizer::OcraTime.now.at_end_of_day
     todos = @todos.select { |e| e.time_to }.select { |e| e.time_to.not_nil!.time.not_nil! <= tf }.sort { |a, b| a.time_to.not_nil!.time <=> b.time_to.not_nil!.time }
     return todos[0...max]
   end
