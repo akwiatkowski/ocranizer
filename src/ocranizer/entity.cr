@@ -24,7 +24,7 @@ module Ocranizer::Entity
     PRIORITY_LOW_STRING => PRIORITY_LOW,
   }
 
-  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
+  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority, :completed
   # repeatition
   property :repeat_entity   # Bool | Nil - true if object qualify as repeatited
   property :repeat_initial  # OcraTime | Nil - copied `time_from`
@@ -57,7 +57,17 @@ module Ocranizer::Entity
     when "yearly"
       params["repeat_interval"] = "1 year"
     end
-    # direct params
+    # completed
+    if params["unfinished"]?
+      self.completed = nil
+      self.completed_at = nil
+    end
+    if params["completed"]? && true != self.completed
+      self.completed = true
+      self.completed_at = Time.now.to_local
+    end
+
+    # repeat direct params
     self.repeat_until_string = params["repeat_until"] if params["repeat_until"]?
     self.repeat_interval_string = params["repeat_interval"] if params["repeat_interval"]?
     self.repeat_count = params["repeat_count"].to_i if params["repeat_count"]?
@@ -248,6 +258,12 @@ module Ocranizer::Entity
         s << self.tags.join(", ").colorize(:cyan).to_s
       end
       s << "\n"
+
+      if self.completed
+        s << "COMPLETED: "
+        s << self.completed_at.not_nil!.to_s("%Y-%m-%d %H:%M")
+        s << "\n"
+      end
 
       s << "Id: "
       s << self.id.to_s

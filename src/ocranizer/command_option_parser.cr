@@ -125,6 +125,13 @@ class Ocranizer::CommandOptionParser
         @params["priority"] = s
       }
 
+      parser.on("-O", "--completed", "Complete Task") { |s|
+        @params["completed"] = "true"
+      }
+      parser.on("--unfinished", "Reverse task completion") { |s|
+        @params["unfinished"] = "true"
+      }
+
       parser.on("--monthly", "Repeat entity monthly") {
         @params["repeat"] = "monthly"
       }

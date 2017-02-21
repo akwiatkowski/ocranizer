@@ -313,8 +313,8 @@ class Ocranizer::HtmlGenerator
       html_cell_per_entity(str, event)
     end
 
-    todos_for_day(day).each do |event|
-      html_cell_per_entity(str, event)
+    todos_for_day(day).each do |todo|
+      html_cell_per_entity(str, todo)
     end
   end
 
@@ -331,6 +331,11 @@ class Ocranizer::HtmlGenerator
     end
 
     str << "<div class=\"entity #{category_klass}\">"
+
+    # is completed
+    if entity.completed
+      str << "<input type=\"checkbox\" checked disabled=\"disabled\" title=\"#{entity.completed_at.not_nil!.to_s("%Y-%m-%d %H:%M")}\">"
+    end
 
     str << "<span class=\"entity-time\">"
     if entity.time_from && entity.time_from.not_nil!.not_fullday?
