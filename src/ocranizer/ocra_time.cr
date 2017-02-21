@@ -178,6 +178,14 @@ struct Ocranizer::OcraTime
     return @time.to_s("%H:%M")
   end
 
+  def to_smart_string
+    if self.fullday?
+      return to_date_string
+    else
+      to_full_string
+    end
+  end
+
   def at_beginning_of_day
     time.at_beginning_of_day
   end

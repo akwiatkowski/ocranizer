@@ -17,6 +17,13 @@ module Ocranizer::Entity
   PRIORITY_REGULAR_STRING   = nil
   PRIORITY_LOW_STRING       = "low"
 
+  PRIORITY_HASH = {
+    PRIORITY_IMPORTANT_STRING => PRIORITY_IMPORTANT,
+    PRIORITY_URGENT_STRING => PRIORITY_URGENT,
+    PRIORITY_REGULAR_STRING => PRIORITY_REGULAR,
+    PRIORITY_LOW_STRING => PRIORITY_LOW,
+  }
+
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
   # repeatition
   property :repeat_entity   # Bool | Nil - true if object qualify as repeatited
@@ -377,6 +384,36 @@ module Ocranizer::Entity
   def low_priority?
     return false if self.priority.nil?
     return self.priority.not_nil! < PRIORITY_REGULAR
+  end
+
+  def hash_command_parameters : Hash(String, String)
+    h = Hash(String, String).new
+    h["-n "] = self.name if self.name
+    h["-a "] = self.time_from.not_nil!.to_smart_string if self.time_from
+    h["-z "] = self.time_to.not_nil!.to_smart_string if self.time_to
+    h["-p "] = self.place if self.place.to_s != ""
+    h["-c "] = self.category if self.category.to_s != ""
+    h["-g "] = self.tags.join(",") if self.tags.size > 0
+    h["--desc="] = self.desc if self.desc.to_s != ""
+    h["-b "] = self.url.not_nil! if self.url.to_s != ""
+    if self.priority
+      i = PRIORITY_HASH.values.index(self.priority)
+      h["-r "] = PRIORITY_HASH.keys[i.not_nil!].as(String)
+      puts PRIORITY_HASH.keys[i.not_nil!]
+    end
+
+    return h
+  end
+
+  def to_command_parameters
+    h = hash_command_parameters
+    s = ""
+
+    h.keys.each do |k|
+      s += "#{k} \"#{h[k]}\" "
+    end
+
+    return s
   end
 
   def filter_hash?(params : Hash)

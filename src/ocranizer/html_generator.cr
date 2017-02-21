@@ -190,6 +190,10 @@ class Ocranizer::HtmlGenerator
     str << entity.id
     str << "</br>"
 
+    str << "Command params: "
+    str << entity.to_command_parameters
+    str << "</br>"
+
     str << "</div>"
     # end of content div
 
