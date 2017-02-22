@@ -3,6 +3,7 @@ require "file_utils"
 
 require "./event"
 require "./todo"
+require "./note"
 
 class Ocranizer::Collection
   # path
@@ -29,7 +30,8 @@ class Ocranizer::Collection
 
   YAML.mapping(
     events: Array(Ocranizer::Event),
-    todos: Array(Ocranizer::Todo)
+    todos: Array(Ocranizer::Todo),
+    notes: (Array(Ocranizer::Note) | Nil)
   )
 
   getter :events, :todos
@@ -37,6 +39,7 @@ class Ocranizer::Collection
   def initialize
     @events = Array(Ocranizer::Event).new
     @todos = Array(Ocranizer::Todo).new
+    @notes = Array(Ocranizer::Note).new
   end
 
   def add!(e : Ocranizer::Event)
@@ -53,7 +56,14 @@ class Ocranizer::Collection
     return ne
   end
 
-  def add(entity : (Ocranizer::Event | Ocranizer::Todo), force : Bool = false)
+  def add!(e : Ocranizer::Note)
+    ne = make_id_uniq(e)
+    @notes.not_nil! << ne
+    @notes.not_nil!.sort!
+    return ne
+  end
+
+  def add(entity : (Ocranizer::Event | Ocranizer::Todo | Ocranizer::Note), force : Bool = false)
     if entity.valid?
       if duplicate?(entity)
         # valid, but duplicate
@@ -80,12 +90,21 @@ class Ocranizer::Collection
     @todos = @todos.select { |a| a.id != e.id }
   end
 
+  def remove(e : Ocranizer::Note)
+    @notes = @notes.select { |a| a.id != e.id }
+  end
+
   def load
     if File.exists?(self.class.path)
       # load regular
       o = Ocranizer::Collection.from_yaml(File.read(self.class.path))
       @events = o.events
       @todos = o.todos
+      # safe migration from version without notes
+      if o.notes
+        @notes = o.notes.not_nil!
+        @notes.not_nil!.sort!
+      end
 
       @events.sort!
       @todos.sort!
@@ -94,6 +113,11 @@ class Ocranizer::Collection
       o = Ocranizer::Collection.from_yaml(File.read(self.class.path_backup))
       @events = o.events
       @todos = o.todos
+      # safe migration from version without notes
+      if o.notes
+        @notes = o.notes.not_nil!
+        @notes.not_nil!.sort!
+      end
 
       @events.sort!
       @todos.sort!
@@ -104,6 +128,9 @@ class Ocranizer::Collection
       e.after_load
     end
     @todos.each do |e|
+      e.after_load
+    end
+    @notes.not_nil!.each do |e|
       e.after_load
     end
   end
@@ -123,7 +150,7 @@ class Ocranizer::Collection
   end
 
   # Add random number as long as `id` will be unique
-  def make_id_uniq(e : Ocranizer::Entity)
+  def make_id_uniq(e : (Ocranizer::Entity | Ocranizer::Note))
     while false == is_id_uniq?(e.id)
       e.id += rand(10).to_s
     end
@@ -149,8 +176,8 @@ class Ocranizer::Collection
     return todos[0...max]
   end
 
-  def duplicate?(e : (Ocranizer::Event | Ocranizer::Todo))
-    return (self.events + self.todos).select { |f| e.name == f.name && e.time_from == f.time_from }.size > 0
+  def duplicate?(e : (Ocranizer::Event | Ocranizer::Todo | Ocranizer::Note))
+    return (self.events + self.todos + self.notes.not_nil!).select { |f| e.name == f.name && e.time_from == f.time_from }.size > 0
   end
 
   def get_event(id : String)

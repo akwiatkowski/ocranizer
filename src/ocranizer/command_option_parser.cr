@@ -13,6 +13,8 @@ class Ocranizer::CommandOptionParser
   COMMAND_SEARCH_TODO = 20
   COMMAND_ADD_TODO    = 22
 
+  COMMAND_ADD_NOTE = 29
+
   COMMAND_SHOW_DETAIL   = 30
   COMMAND_UPDATE_DETAIL = 31
   COMMAND_DELETE        = 32
@@ -50,6 +52,11 @@ class Ocranizer::CommandOptionParser
 
       parser.on("-t", "--search-todos", "Search events") { |s|
         @command = COMMAND_SEARCH_TODO
+        @params["name"] = s
+      }
+
+      parser.on("-N NAME", "--add-note=NAME", "Add note") { |s|
+        @command = COMMAND_ADD_NOTE
         @params["name"] = s
       }
 
@@ -207,6 +214,26 @@ class Ocranizer::CommandOptionParser
       # `id` is made unique when adding to collection
       # so it must be getted there
       ne = c.add(entity: e, force: "true" == @params["force"]?)
+
+      if ne
+        # was added, valid and not duplicate
+        # save to config file
+        c.save
+        # return
+        e = ne.not_nil!
+        return render_detailed_entity(e)
+      end
+
+      return nil
+      # end
+    when COMMAND_ADD_NOTE
+      c = Ocranizer::Collection.new
+      c.load
+
+      e = Ocranizer::Note.new
+
+      e.content = @params["name"]
+      ne = c.add(entity: e)
 
       if ne
         # was added, valid and not duplicate

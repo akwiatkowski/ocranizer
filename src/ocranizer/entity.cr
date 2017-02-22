@@ -3,8 +3,11 @@ require "colorize"
 
 require "./ocra_time"
 require "./collection"
+require "./decorators/sort"
 
 module Ocranizer::Entity
+  include Ocranizer::Decorators::Sort
+
   DEFAULT_USER = ""
 
   PRIORITY_IMPORTANT = 100
@@ -19,9 +22,9 @@ module Ocranizer::Entity
 
   PRIORITY_HASH = {
     PRIORITY_IMPORTANT_STRING => PRIORITY_IMPORTANT,
-    PRIORITY_URGENT_STRING => PRIORITY_URGENT,
-    PRIORITY_REGULAR_STRING => PRIORITY_REGULAR,
-    PRIORITY_LOW_STRING => PRIORITY_LOW,
+    PRIORITY_URGENT_STRING    => PRIORITY_URGENT,
+    PRIORITY_REGULAR_STRING   => PRIORITY_REGULAR,
+    PRIORITY_LOW_STRING       => PRIORITY_LOW,
   }
 
   property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority, :completed
@@ -230,13 +233,13 @@ module Ocranizer::Entity
       s << "\n"
 
       s << "Place: "
-      if self.place.size > 0
+      if self.place.to_s.size > 0
         s << self.place.colorize(:yellow).to_s
       end
       s << "\n"
 
       s << "Desc: "
-      if self.desc.size > 0
+      if self.desc.to_s.size > 0
         s << self.desc.colorize(:yellow).to_s
       end
       s << "\n"
@@ -248,7 +251,7 @@ module Ocranizer::Entity
       s << "\n"
 
       s << "Category: "
-      if self.category.size > 0
+      if self.category.to_s.size > 0
         s << self.category.colorize(:magenta).to_s
       end
       s << "\n"
@@ -562,21 +565,7 @@ module Ocranizer::Entity
     return true
   end
 
-  def >(other)
-    (self <=> other) == 1
-  end
 
-  def <(other)
-    (self <=> other) == -1
-  end
-
-  def >=(other)
-    (self <=> other) == 1 || (self <=> other) == 0
-  end
-
-  def <=(other)
-    (self <=> other) == -1 || (self <=> other) == 0
-  end
 
   def is_within?(day : Time) : Bool
     t = day.at_beginning_of_day
