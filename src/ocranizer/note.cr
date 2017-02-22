@@ -73,4 +73,45 @@ class Ocranizer::Note
 
     return st
   end
+
+  def filter_hash?(params : Hash)
+    # no filters
+    return true if params.keys.size == 0
+
+    # id - substring, ignore case
+    if params["id"]?
+      return false if self.id.downcase.index(params["id"].downcase).nil?
+    end
+
+    # name/content - substring, ignore case
+    if params["name"]?
+      return false if self.content.downcase.index(params["name"].downcase).nil?
+    end
+    if params["content"]?
+      return false if self.content.downcase.index(params["name"].downcase).nil?
+    end
+
+    if params["time_from"]?
+      t = OcraTime.parse_human(params["time_from"]).at_beginning
+      return false if self.created_at < t
+    end
+
+    if params["time_to"]?
+      t = OcraTime.parse_human(params["time_to"]).at_end
+      return false if self.created_at > t
+    end
+
+    if params["day"]?
+      tf = OcraTime.parse_human(params["day"]).at_beginning
+      tt = OcraTime.parse_human(params["day"]).at_end
+
+      if tf >= self.created_at && tt <= self.created_at
+        # ok
+      else
+        return false
+      end
+    end
+
+    return true
+  end
 end

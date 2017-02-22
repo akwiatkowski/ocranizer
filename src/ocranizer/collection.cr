@@ -165,6 +165,10 @@ class Ocranizer::Collection
     todos.sort.select { |e| e.filter_hash?(params) }
   end
 
+  def notes(params : Hash)
+    notes.not_nil!.sort.select { |e| e.filter_hash?(params) }
+  end
+
   def incoming_events(max : Int32 = 20)
     tf = Ocranizer::OcraTime.now.at_beginning_of_day
     return @events.select { |e| e.time_from.at_beginning_of_day >= tf }.sort { |a, b| a.time_from.time <=> b.time_from.time }[0...max]

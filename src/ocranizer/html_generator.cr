@@ -8,11 +8,12 @@ class Ocranizer::HtmlGenerator
                  @params : Hash(String, String))
     @events = @collection.events(params: params).as(Array(Ocranizer::Event))
     @todos = @collection.todos(params: params).as(Array(Ocranizer::Todo))
+    @notes = @collection.notes(params: params).as(Array(Ocranizer::Note))
 
     @time_from = Ocranizer::OcraTime.now.at_beginning_of_month.as(Time)
     @time_to = calendar_time_to.as(Time)
 
-    # repeated entities
+    # repeated entities (only Event and Todo)
     repeated_entities = Array(Ocranizer::Entity).new
 
     @events.each do |event|
@@ -200,6 +201,45 @@ class Ocranizer::HtmlGenerator
     str << "</div>"
   end
 
+  private def html_per_note(str, note)
+    klass = note.class.to_s.downcase.gsub("ocranizer::", "")
+    str << "<a name=\"#{note.id}\"></a>"
+    str << "<div class=\"entity-list-item #{klass}\">"
+
+    str << "<div class=\"entity-name\">"
+    str << note.name
+    str << "</div>"
+
+    str << "<div class=\"entity-day\">"
+    str << note.created_at.to_s("%d")
+    str << "</div>"
+
+    str << "<div class=\"entity-month\">"
+    str << note.created_at.to_s("%b")
+    str << "</div>"
+
+    str << "<div class=\"entity-year\">"
+    str << note.created_at.to_s("%Y")
+    str << "</div>"
+
+    str << "<div class=\"entity-content\">"
+
+    # note name is alias of content
+    # str << note.content
+    # str << "</br>"
+
+    str << "<span class=\"small\">"
+    str << "ID: "
+    str << note.id
+    str << "</span>"
+    str << "</br>"
+
+    str << "</div>"
+    # end of content div
+
+    str << "</div>"
+  end
+
   private def html_body(str)
     str << "<h1>Ocranizer</h1>"
     html_calendar(str)
@@ -207,6 +247,8 @@ class Ocranizer::HtmlGenerator
     html_events(str)
     str << "<h2>Todos</h2>"
     html_todos(str)
+    str << "<h2>Notes</h2>"
+    html_notes(str)
   end
 
   private def html_events(str)
@@ -218,6 +260,12 @@ class Ocranizer::HtmlGenerator
   private def html_todos(str)
     @todos.each do |event|
       html_per_entity(str, event)
+    end
+  end
+
+  private def html_notes(str)
+    @notes.each do |note|
+      html_per_note(str, note)
     end
   end
 
