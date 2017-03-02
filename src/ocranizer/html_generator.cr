@@ -381,7 +381,7 @@ class Ocranizer::HtmlGenerator
     str << "<div class=\"entity #{category_klass}\">"
 
     # is completed
-    if entity.completed
+    if entity.completed?
       str << "<input type=\"checkbox\" checked disabled=\"disabled\" title=\"#{entity.completed_at.not_nil!.to_s("%Y-%m-%d %H:%M")}\">"
     end
 

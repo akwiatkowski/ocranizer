@@ -83,4 +83,14 @@ class Ocranizer::Event
     end
     return self.name <=> other.name
   end
+
+  def update_attributes(params : Hash(String, String))
+    super(params)
+    if params["time_to"]?.nil? && self.time_from.fullday?
+      self.time_to.type = self.time_from.type
+
+      self.time_to.time = self.time_from.time
+      self.time_to.time = self.time_to.at_end_of_day
+    end
+  end
 end

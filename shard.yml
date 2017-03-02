@@ -1,5 +1,5 @@
 name: ocranizer
-version: 0.1.0
+version: 0.1.1
 
 authors:
   - Aleksander Kwiatkowski <bobikx@poczta.fm>
@@ -8,7 +8,7 @@ targets:
   pim:
     main: src/pim.cr
 
-crystal: 0.20.5
+crystal: 0.21.0
 
 license: MIT
 

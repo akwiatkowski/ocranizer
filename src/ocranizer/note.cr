@@ -14,9 +14,9 @@ class Ocranizer::Note
   )
 
   JSON.mapping(
-  id: String,
-  created_at: Time,
-  content: String
+    id: String,
+    created_at: Time,
+    content: String
   )
 
   def initialize

@@ -27,7 +27,7 @@ module Ocranizer::Entity
     PRIORITY_LOW_STRING       => PRIORITY_LOW,
   }
 
-  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority, :completed
+  property :user, :time_from, :time_to, :name, :desc, :place, :category, :url, :priority
   # repeatition
   property :repeat_entity   # Bool | Nil - true if object qualify as repeatited
   property :repeat_initial  # OcraTime | Nil - copied `time_from`
@@ -62,11 +62,9 @@ module Ocranizer::Entity
     end
     # completed
     if params["unfinished"]?
-      self.completed = nil
       self.completed_at = nil
     end
-    if params["completed"]? && true != self.completed
-      self.completed = true
+    if params["completed"]? && true != self.completed?
       self.completed_at = Time.now.to_local
     end
 
@@ -83,6 +81,10 @@ module Ocranizer::Entity
     else
       return false
     end
+  end
+
+  def completed?
+    false == self.completed_at.nil?
   end
 
   private def repeatition_update_attributes
@@ -215,6 +217,22 @@ module Ocranizer::Entity
     return new_entity
   end
 
+  def time_from_to_time
+    if self.time_from
+      return self.time_from.not_nil!.at_beginning
+    else
+      return nil
+    end
+  end
+
+  def time_to_to_time
+    if self.time_to
+      return self.time_to.not_nil!.at_end
+    else
+      return nil
+    end
+  end
+
   def to_s_full
     st = String.build do |s|
       if false == valid?
@@ -262,7 +280,7 @@ module Ocranizer::Entity
       end
       s << "\n"
 
-      if self.completed
+      if self.completed?
         s << "COMPLETED: "
         s << self.completed_at.not_nil!.to_s("%Y-%m-%d %H:%M")
         s << "\n"
@@ -564,8 +582,6 @@ module Ocranizer::Entity
 
     return true
   end
-
-
 
   def is_within?(day : Time) : Bool
     t = day.at_beginning_of_day
