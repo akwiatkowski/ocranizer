@@ -1,5 +1,5 @@
 class Ocranizer::IdGenerator
-  FIX_ID = true
+  FIX_ID = false
   SEPARATOR = "+"
 
   @@array = Array(String).new

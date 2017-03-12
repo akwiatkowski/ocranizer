@@ -457,7 +457,6 @@ module Ocranizer::Entity
     if self.priority
       i = PRIORITY_HASH.values.index(self.priority)
       h["-r "] = PRIORITY_HASH.keys[i.not_nil!].as(String)
-      puts PRIORITY_HASH.keys[i.not_nil!]
     end
 
     return h

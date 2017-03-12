@@ -139,8 +139,6 @@ class Ocranizer::Collection
     Ocranizer::IdGenerator.add(@events.not_nil!)
     Ocranizer::IdGenerator.add(@todos.not_nil!)
     Ocranizer::IdGenerator.add(@notes.not_nil!)
-
-    save
   end
 
   def save
