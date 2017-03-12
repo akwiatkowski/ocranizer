@@ -8,6 +8,13 @@ describe Ocranizer::Todo do
       "repeat"  => "weekly",
     })
 
-    puts e.inspect
+    e.is_repeated?.should eq(true)
+
+    nes = e.repeated_entities(
+      repeated_from: Time.new(2017, 1, 1),
+      repeated_to: Time.new(2017, 2, 1)
+    )
+
+    nes.not_nil!.size.should eq(4 + 1) # initial + 4 more
   end
 end

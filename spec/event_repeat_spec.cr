@@ -20,4 +20,35 @@ describe Ocranizer::Event do
     child_events[0].min_time.year.should eq(2017)
     child_events[1].min_time.year.should eq(2018)
   end
+
+  it "get events untill time" do
+    e = Ocranizer::Event.new
+    e.update_attributes({
+      "time_from"       => "2000-01-05",
+      "time_to"         => "2000-01-05",
+      "repeat_interval" => "2 weeks",
+    })
+
+    nes = e.repeated_entities(
+      repeated_from: e.time_from.time,
+      repeated_to: Time.new(2000, 3, 1)
+    ).not_nil!
+    nes.size.should eq(4 + 1) # initial + 4 more
+  end
+
+  it "test real life example" do
+    e = Ocranizer::Event.new
+    e.update_attributes({
+      "time_from" => "1960-10-10",
+      "time_to"   => "1960-10-10",
+      "name"      => "Birthday",
+      "repeat"    => "yearly",
+    })
+
+    nes = e.repeated_entities(
+      repeated_from: e.time_from.time,
+      repeated_to: Time.new(2017, 10, 1)
+    ).not_nil!
+    nes.size.should eq(56 + 1)
+  end
 end

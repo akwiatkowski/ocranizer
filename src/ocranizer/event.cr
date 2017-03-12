@@ -27,7 +27,8 @@ class Ocranizer::Event
     repeat_initial: (Ocranizer::OcraTime | Nil),
     repeat_until: (Ocranizer::OcraTime | Nil),
     repeat_interval_string: (String | Nil),
-    repeat_count: (Int32 | Nil)
+    repeat_count: (Int32 | Nil),
+    repeatition_number: (Int32 | Nil),
   )
 
   JSON.mapping(
@@ -48,7 +49,8 @@ class Ocranizer::Event
     repeat_initial: (Ocranizer::OcraTime | Nil),
     repeat_until: (Ocranizer::OcraTime | Nil),
     repeat_interval_string: (String | Nil),
-    repeat_count: (Int32 | Nil)
+    repeat_count: (Int32 | Nil),
+    repeatition_number: (Int32 | Nil),
   )
 
   def initialize

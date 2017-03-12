@@ -6,27 +6,57 @@ class Ocranizer::HtmlGenerator
   def initialize(
                  @collection : Ocranizer::Collection,
                  @params : Hash(String, String))
-    @events = @collection.events(params: params).as(Array(Ocranizer::Event))
-    @todos = @collection.todos(params: params).as(Array(Ocranizer::Todo))
+    # intialize arrays
+    @events = Array(Ocranizer::Event).new
+    @todos = Array(Ocranizer::Todo).new
     @notes = @collection.notes(params: params).as(Array(Ocranizer::Note))
 
     @time_from = Ocranizer::OcraTime.now.at_beginning_of_month.as(Time)
-    @time_to = calendar_time_to.as(Time)
+    @time_to = @time_from
 
-    # repeated entities (only Event and Todo)
-    repeated_entities = Array(Ocranizer::Entity).new
+    # get all events/todos in temp variable because of repeated entities
+    temp_events = @collection.events(params: params).as(Array(Ocranizer::Event))
+    temp_todos = @collection.todos(params: params).as(Array(Ocranizer::Todo))
 
-    @events.each do |event|
-      repeated_entities += event.next_entities_until(time: @time_to)
+    # calculate max time_to
+    temp_events.map(&.max_time).each do |mt|
+      if mt && @time_to < mt.not_nil!
+        @time_to = mt.not_nil!
+      end
     end
-    @todos.each do |todo|
-      repeated_entities += todo.next_entities_until(time: @time_to)
+
+    temp_todos.map(&.max_time).each do |mt|
+      if mt && @time_to < mt.not_nil!
+        @time_to = mt.not_nil!
+      end
     end
-    repeated_entities.each do |e|
-      if e.as?(Ocranizer::Todo)
-        @todos << e.as(Ocranizer::Todo)
-      elsif e.as?(Ocranizer::Event)
-        @events << e.as(Ocranizer::Event)
+
+    @time_to = @time_to.at_end_of_month
+
+    # copy entities
+    temp_events.each do |entity|
+      if entity.is_repeated?
+        result = entity.repeated_entities(repeated_from: @time_from, repeated_to: @time_to)
+        if result
+          result.not_nil!.each do |re|
+            @events << re.as(Ocranizer::Event)
+          end
+        end
+      else
+        @events << entity
+      end
+    end
+
+    temp_todos.each do |entity|
+      if entity.is_repeated?
+        result = entity.repeated_entities(repeated_from: @time_from, repeated_to: @time_to)
+        if result
+          result.not_nil!.each do |re|
+            @todos << re.as(Ocranizer::Todo)
+          end
+        end
+      else
+        @todos << entity
       end
     end
   end
@@ -144,6 +174,21 @@ class Ocranizer::HtmlGenerator
     if entity.time_to
       str << "Time to: "
       str << entity.time_to.not_nil!.time.to_s("%Y-%m-%d %H:%M")
+      str << "</br>"
+    end
+
+    if entity.repeat_interval_string.to_s.size > 0
+      str << "Repeat: every "
+      str << entity.repeat_interval_string.to_s
+
+      if entity.repeat_until
+        str << " untill #{entity.repeat_until.not_nil!.time.to_s("%Y-%m-%d %H:%M")}"
+      end
+
+      if entity.repeat_count
+        str << " max #{entity.repeat_count.not_nil!} times"
+      end
+
       str << "</br>"
     end
 
@@ -267,17 +312,6 @@ class Ocranizer::HtmlGenerator
     @notes.each do |note|
       html_per_note(str, note)
     end
-  end
-
-  private def calendar_time_to
-    t_tos = Array(Time).new
-    t_tos << Ocranizer::OcraTime.now.at_end_of_month
-
-    t_tos += @events.map(&.time_to).map(&.time)
-    t_tos += @todos.map(&.time_to).select { |t| t }.map { |t| t.not_nil!.time }
-    t_to = t_tos.max.as(Time)
-    t_to = t_to.at_end_of_month
-    return t_to
   end
 
   private def html_calendar(str)
