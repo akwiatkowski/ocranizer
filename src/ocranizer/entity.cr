@@ -72,128 +72,204 @@ module Ocranizer::Entity
     self.repeat_until_string = params["repeat_until"] if params["repeat_until"]?
     self.repeat_interval_string = params["repeat_interval"] if params["repeat_interval"]?
     self.repeat_count = params["repeat_count"].to_i if params["repeat_count"]?
-    repeatition_update_attributes
-  end
-
-  def is_repeated?
-    if (self.time_from || self.time_to) && self.repeat_interval_string
-      return true
-    else
-      return false
-    end
   end
 
   def completed?
     false == self.completed_at.nil?
   end
 
-  private def repeatition_update_attributes
-    # both times are required for repeatition
-    if self.time_from.nil? && self.time_to.nil?
-      self.repeat_entity = false
-    end
+  # begin of repeated methods
 
-    # the only required attr to start repeated Entity is `repeat_interval_string`
+  def is_repeated?
     if self.repeat_interval_string
-      self.repeat_entity = true
-
-      # update only if not set
-      if self.time_from
-        self.repeat_initial ||= self.time_from.not_nil!
-      elsif self.time_to
-        self.repeat_initial ||= self.time_to.not_nil!
-      else
-        # should not occur
-      end
-    end
-  end
-
-  def repeatition_iterate_until_now
-    # check if its repeatition Entity
-    return false unless self.is_repeated?
-
-    while self.max_time <= Ocranizer::OcraTime.now
-      repeatition_iterate_time_ranges
-    end
-  end
-
-  def repeatition_iterate_until_current_month
-    # check if its repeatition Entity
-    return false unless self.is_repeated?
-
-    while self.max_time <= Ocranizer::OcraTime.now.at_beginning_of_month
-      repeatition_iterate_time_ranges
-    end
-  end
-
-  def repeatition_iterate_time_ranges
-    # check if its repeatition Entity
-    return false unless self.is_repeated?
-
-    # `repeat_count` nil means repeat infinite
-    # `repeat_count` is number, update times and decrement
-    if self.repeat_count.nil? || self.repeat_count.not_nil! > 0
-      span = Ocranizer::OcraTimeSpan.new(string: repeat_interval_string.not_nil!)
-
-      if self.time_from
-        self.time_from.not_nil!.time = span + self.time_from.not_nil!.time
-      end
-      if self.time_to
-        self.time_to.not_nil!.time = span + self.time_to.not_nil!.time
-      end
-      if self.repeat_count
-        # decrement limited repeatitions
-        self.repeat_count = self.repeat_count.not_nil! - 1
-      end
-
       return true
+    else
+      return false
+    end
+  end
+
+  # if this repeated entity can create next one
+  def has_next?
+    if self.repeat_count.nil? || self.repeat_count.not_nil! > 0
+      return true
+    else
+      return false
+    end
+  end
+
+  def repeated_entities(
+                        repeated_from : Time,
+                        repeated_to : Time)
+
+    # no repeated entity
+    return nil if false == is_repeated?
+
+    # entity must have time
+    return nil if self.max_time.nil? || self.min_time.nil?
+
+    array = Array(Entity).new
+
+    object = self
+    while object && object.has_next?
+      if object.min_time >= repeated_from &&
+        object.min_time <= repeated_to
+        array << object
+      end
+      object = object.next_repeat
+
+      # we are done here
+      # there can't be any suitable entity
+      return array if object.nil? || object.not_nil!.min_time > repeated_to
     end
 
-    return false
+    return array
   end
+
+  def repeated_entities
+    if self.time_from
+      tf = self.time_from.not_nil!.time
+    else
+      tf = OcraTime.now
+    end
+
+    if self.time_to
+      tt = self.time_to.not_nil!.time
+    else
+      tt = tf + OcraTime::MONTH_SPAN
+    end
+
+    return repeated_entities(
+      repeated_from: tf,
+      repeated_to: tt
+    )
+  end
+
 
   # return next Entity or nil for
-  def next_entity : (Entity | Nil)
+  def next_repeat : (Entity | Nil)
     return nil if false == self.is_repeated?
 
     # clone without id
     new_entity = self.clone
 
     # decrement repeat count
-    result = new_entity.repeatition_iterate_time_ranges
+    new_entity.nextify!
 
-    # create fake ID
+    # create fake ID XXX
     new_entity.id = new_entity.max_time.to_local.to_s("%Y%m%d%H%M%S%L") + "_" + rand(10_000).to_s
 
-    if result
-      # could be created (ex: count > 0)
-      return new_entity
-    else
-      return nil
+    return new_entity
+  end
+
+  protected def nextify!
+    span = Ocranizer::OcraTimeSpan.new(string: repeat_interval_string.not_nil!)
+
+    if self.time_from
+      self.time_from.not_nil!.time = span + self.time_from.not_nil!.time
+    end
+    if self.time_to
+      self.time_to.not_nil!.time = span + self.time_to.not_nil!.time
+    end
+    if self.repeat_count
+      # decrement limited repeatitions
+      self.repeat_count = self.repeat_count.not_nil! - 1
     end
   end
 
-  def next_entities_until(time : Time)
-    a = Array(Entity).new
-    e = self
-    in_loop = true
 
-    while in_loop
-      ne = e.next_entity
-      if ne && ne.not_nil!.max_time <= time
-        a << ne
-        e = ne
-      else
-        in_loop = false
-      end
-    end
+  # private def repeatition_update_attributes
+  #   # both times are required for repeatition
+  #   if self.time_from.nil? && self.time_to.nil?
+  #     self.repeat_entity = false
+  #   end
+  #
+  #   # the only required attr to start repeated Entity is `repeat_interval_string`
+  #   if self.repeat_interval_string
+  #     self.repeat_entity = true
+  #
+  #     # update only if not set
+  #     if self.time_from
+  #       self.repeat_initial ||= self.time_from.not_nil!
+  #     elsif self.time_to
+  #       self.repeat_initial ||= self.time_to.not_nil!
+  #     else
+  #       # should not occur
+  #     end
+  #   end
+  # end
+  #
+  # def repeatition_iterate_until_now
+  #   # check if its repeatition Entity
+  #   return false unless self.is_repeated?
+  #
+  #   while self.max_time <= Ocranizer::OcraTime.now
+  #     repeatition_iterate_time_ranges
+  #   end
+  # end
+  #
+  # def repeatition_iterate_until_current_month
+  #   # check if its repeatition Entity
+  #   return false unless self.is_repeated?
+  #
+  #   while self.max_time <= Ocranizer::OcraTime.now.at_beginning_of_month
+  #     repeatition_iterate_time_ranges
+  #   end
+  # end
+  #
+  # def repeatition_iterate_time_ranges
+  #   # check if its repeatition Entity
+  #   return false unless self.is_repeated?
+  #
+  #   # `repeat_count` nil means repeat infinite
+  #   # `repeat_count` is number, update times and decrement
+  #   if self.repeat_count.nil? || self.repeat_count.not_nil! > 0
+  #     span = Ocranizer::OcraTimeSpan.new(string: repeat_interval_string.not_nil!)
+  #
+  #     if self.time_from
+  #       self.time_from.not_nil!.time = span + self.time_from.not_nil!.time
+  #     end
+  #     if self.time_to
+  #       self.time_to.not_nil!.time = span + self.time_to.not_nil!.time
+  #     end
+  #     if self.repeat_count
+  #       # decrement limited repeatitions
+  #       self.repeat_count = self.repeat_count.not_nil! - 1
+  #     end
+  #
+  #     return true
+  #   end
+  #
+  #   return false
+  # end
+  #
 
-    return a
-  end
+  #
+  # def next_entities_until(time : Time)
+  #   a = Array(Entity).new
+  #   e = self
+  #   in_loop = true
+  #
+  #   while in_loop
+  #     ne = e.next_entity
+  #     if ne && ne.not_nil!.max_time <= time
+  #       a << ne
+  #       e = ne
+  #     else
+  #       in_loop = false
+  #     end
+  #   end
+  #
+  #   return a
+  # end
 
   def max_time : Time
     [self.time_from, self.time_to].select { |t| t }.map { |t| t.not_nil!.time }.max
   end
+
+  def min_time : Time
+    [self.time_from, self.time_to].select { |t| t }.map { |t| t.not_nil!.time }.min
+  end
+
 
   def clone
     new_entity = self.class.new
