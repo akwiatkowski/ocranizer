@@ -4,6 +4,7 @@ require "file_utils"
 require "./event"
 require "./todo"
 require "./note"
+require "./id_generator"
 
 class Ocranizer::Collection
   # path
@@ -133,6 +134,13 @@ class Ocranizer::Collection
     @notes.not_nil!.each do |e|
       e.after_load
     end
+
+    # to unique id generator
+    Ocranizer::IdGenerator.add(@events.not_nil!)
+    Ocranizer::IdGenerator.add(@todos.not_nil!)
+    Ocranizer::IdGenerator.add(@notes.not_nil!)
+
+    save
   end
 
   def save

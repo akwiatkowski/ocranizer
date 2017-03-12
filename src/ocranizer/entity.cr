@@ -174,7 +174,7 @@ module Ocranizer::Entity
     new_entity.nextify!
 
     # create fake ID XXX
-    new_entity.id = self.id + "_#{new_entity.repeatition_number}"
+    Ocranizer::IdGenerator.generate(new_entity, new_entity.repeatition_number)
 
     return new_entity
   end
