@@ -1,6 +1,8 @@
 class Ocranizer::IdGenerator
-  FIX_ID = false
-  SEPARATOR = "+"
+  FIX_ID          = false
+  SEPARATOR       = "_"
+  REQUIRED_LENGTH =  3
+  CROP_SIZE       = 22
 
   @@array = Array(String).new
 
@@ -20,6 +22,10 @@ class Ocranizer::IdGenerator
     false == @@array.includes?(id)
   end
 
+  def self.long_enough?(id : String)
+    return id.size > REQUIRED_LENGTH
+  end
+
   def self.change_id(entity)
     old_id = entity.id
 
@@ -32,13 +38,18 @@ class Ocranizer::IdGenerator
 
   def self.generate(entity, repeated_number : (Int | Nil) = nil)
     splits = entity.name.split(" ")
-    splits = splits.map{|s| s.downcase.gsub(/\W/, "") }
-    splits = splits.select{|s| s.size < 20 && s.size > 2 }
+    splits = splits.map { |s| s.downcase.gsub(/\W/, "") }
+    splits = splits.select { |s| s.size < 20 && s.size > 2 }
 
-    string = splits.join(SEPARATOR)
-    string = string[0..15]
+    string = ""
+    if entity.responds_to?(:min_time) && entity.min_time
+      string += entity.min_time.not_nil!.to_s_day_safe
+      string += "_"
+    end
+    string += splits.join(SEPARATOR)
+    string = string[0..CROP_SIZE]
 
-    while false == uniq?(string)
+    while false == uniq?(string) || false == long_enough?(string)
       string += random_char.downcase
     end
 

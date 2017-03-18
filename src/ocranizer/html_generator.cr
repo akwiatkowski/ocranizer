@@ -123,6 +123,8 @@ class Ocranizer::HtmlGenerator
     str << ".entity-list-item .entity-name{top: 0px; left: 80px; position: relative; font-size: 120%; margin-bottom: 10px} "
     str << ".entity-list-item .entity-content{left: 80px; position: relative} "
 
+    str << ".command {font-family: monospace; background-color: #fafafa}"
+
     str << "</style>"
     # TODO add https://github.com/kenwheeler/cash/
     # TODO add https://github.com/flouthoc/uglipop.js/
@@ -237,7 +239,15 @@ class Ocranizer::HtmlGenerator
     str << "</br>"
 
     str << "Command params: "
-    str << entity.to_command_parameters
+    str << "<span class=\"command\">"
+    str << entity.to_command_params
+    str << "</span>"
+    str << "</br>"
+
+    str << "Complete command: "
+    str << "<span class=\"command\">"
+    str << entity.to_complete_command
+    str << "</span>"
     str << "</br>"
 
     str << "</div>"
@@ -249,39 +259,12 @@ class Ocranizer::HtmlGenerator
   private def html_per_note(str, note)
     klass = note.class.to_s.downcase.gsub("ocranizer::", "")
     str << "<a name=\"#{note.id}\"></a>"
-    str << "<div class=\"entity-list-item #{klass}\">"
+    str << "<div class=\"none-list-item #{klass}\">"
 
-    str << "<div class=\"entity-name\">"
+    str << note.created_at.to_s_day
+    str << " - "
     str << note.name
-    str << "</div>"
-
-    str << "<div class=\"entity-day\">"
-    str << note.created_at.to_s("%d")
-    str << "</div>"
-
-    str << "<div class=\"entity-month\">"
-    str << note.created_at.to_s("%b")
-    str << "</div>"
-
-    str << "<div class=\"entity-year\">"
-    str << note.created_at.to_s("%Y")
-    str << "</div>"
-
-    str << "<div class=\"entity-content\">"
-
-    # note name is alias of content
-    # str << note.content
-    # str << "</br>"
-
-    str << "<span class=\"small\">"
-    str << "ID: "
-    str << note.id
-    str << "</span>"
-    str << "</br>"
-
-    str << "</div>"
-    # end of content div
-
+    str << " (id: #{note.id})"
     str << "</div>"
   end
 

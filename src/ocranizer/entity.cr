@@ -4,6 +4,7 @@ require "colorize"
 require "./ocra_time"
 require "./collection"
 require "./decorators/sort"
+require "./time"
 
 module Ocranizer::Entity
   include Ocranizer::Decorators::Sort
@@ -219,6 +220,7 @@ module Ocranizer::Entity
     new_entity = self.class.new
 
     new_entity.category = self.category
+    new_entity.completed_at = self.completed_at
     new_entity.desc = self.desc
     new_entity.name = self.name
     new_entity.place = self.place
@@ -462,7 +464,7 @@ module Ocranizer::Entity
     return h
   end
 
-  def to_command_parameters
+  def to_command_params
     h = hash_command_parameters
     s = ""
 
@@ -471,6 +473,10 @@ module Ocranizer::Entity
     end
 
     return s
+  end
+
+  def to_complete_command
+    s = "-S \"#{self.id}\" --completed"
   end
 
   def filter_hash?(params : Hash)

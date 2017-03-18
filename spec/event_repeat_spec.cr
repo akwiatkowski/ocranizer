@@ -17,8 +17,8 @@ describe Ocranizer::Event do
 
     child_events.size.should eq(2)
 
-    child_events[0].min_time.year.should eq(2017)
-    child_events[1].min_time.year.should eq(2018)
+    child_events[0].min_time.not_nil!.year.should eq(2017)
+    child_events[1].min_time.not_nil!.year.should eq(2018)
   end
 
   it "get events untill time" do
