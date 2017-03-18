@@ -51,7 +51,7 @@ class Ocranizer::Todo
   )
 
   def initialize
-    @id = Time.now.to_local.to_s("%Y%m%d%H%M%S%L")
+    @id = ""
     @user = ""
 
     @time_from = nil

@@ -76,6 +76,8 @@ module Ocranizer::Entity
     self.repeat_until_string = params["repeat_until"] if params["repeat_until"]?
     self.repeat_interval_string = params["repeat_interval"] if params["repeat_interval"]?
     self.repeat_count = params["repeat_count"].to_i if params["repeat_count"]?
+
+    self.id = Ocranizer::IdGenerator.generate(self) if self.id.to_s == ""
   end
 
   def completed?
@@ -416,6 +418,8 @@ module Ocranizer::Entity
       self.priority = PRIORITY_LOW
       return
     end
+
+    self.priority = nil
   end
 
   def valid?

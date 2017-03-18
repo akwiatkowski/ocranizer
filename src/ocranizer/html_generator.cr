@@ -1,4 +1,9 @@
 class Ocranizer::HtmlGenerator
+  HTTP_URL_REGEX  = Regex.new("https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
+  SHORT_URL_REGEX = Regex.new("[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
+  WORKING_REGEX   = /(https?:\S+)/
+  URL_REGEX       = WORKING_REGEX
+
   def self.output_path
     return Ocranizer::Collection.path + ".html"
   end
@@ -263,7 +268,7 @@ class Ocranizer::HtmlGenerator
 
     str << note.created_at.to_s_day
     str << " - "
-    str << note.name
+    str << add_links_to_string(note.name)
     str << " (id: #{note.id})"
     str << "</div>"
   end
@@ -381,6 +386,14 @@ class Ocranizer::HtmlGenerator
     todos_for_day(day).each do |todo|
       html_cell_per_entity(str, todo)
     end
+  end
+
+  def add_links_to_string(string : String)
+    string.scan(URL_REGEX).each do |r|
+      string = string.gsub(r[0], "<a href=\"#{r[1]}\" target=\"_blank\">#{r[1]}</a>")
+    end
+
+    return string
   end
 
   private def html_cell_per_entity(str, entity : (Ocranizer::Event | Ocranizer::Todo))

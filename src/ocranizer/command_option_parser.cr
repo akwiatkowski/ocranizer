@@ -146,6 +146,10 @@ class Ocranizer::CommandOptionParser
         @params["repeat"] = "yearly"
       }
 
+      parser.on("--regular", "Repeat entity yearly") {
+        @params["priority"] = "regular"
+      }
+
       parser.on("-F", "--force", "Force action") {
         @params["force"] = "true"
       }
